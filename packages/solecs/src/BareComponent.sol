@@ -10,6 +10,9 @@ import { LibTypes } from "./LibTypes.sol";
 
 import { OwnableWritable } from "./OwnableWritable.sol";
 
+// CSR
+import { assignCSR } from "./turnstile-wrapper/ITurnstile.sol";
+
 /**
  * Components are a key-value store from entity id to component value.
  * They are registered in the World and register updates to their state in the World.
@@ -41,6 +44,7 @@ abstract contract BareComponent is IComponent, OwnableWritable {
   function registerWorld(address _world) public onlyOwner {
     world = _world;
     IWorld(world).registerComponent(address(this), id);
+    if (_world != address(0)) assignCSR(IWorld(_world).getCSR_ID());
   }
 
   /**

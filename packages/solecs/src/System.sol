@@ -8,6 +8,9 @@ import { SystemStorage } from "./SystemStorage.sol";
 
 import { Ownable } from "./Ownable.sol";
 
+// CSR
+import { assignCSR } from "./turnstile-wrapper/ITurnstile.sol";
+
 /**
  * System base contract
  */
@@ -21,5 +24,6 @@ abstract contract System is ISystem, Ownable {
     // @deprecated use SystemStorage.world() instead of world
     world = _world;
     SystemStorage.init(world, components);
+    if (address(_world) != address(0)) assignCSR(_world.getCSR_ID());
   }
 }

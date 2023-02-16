@@ -11,6 +11,9 @@ import { addressToEntity, entityToAddress, getIdByAddress, getAddressById, getCo
 import { componentsComponentId, systemsComponentId } from "./constants.sol";
 import { RegisterSystem, ID as registerSystemId, RegisterType } from "./systems/RegisterSystem.sol";
 
+// Canto CSR
+import { registerCSR } from "./turnstile-wrapper/ITurnstile.sol";
+
 /**
  * The `World` contract is at the core of every on-chain world.
  * Entities, components and systems are registered in the `World`.
@@ -32,15 +35,18 @@ contract World is IWorld {
   Uint256Component private _systems;
   RegisterSystem public register;
 
+  // store world's CSR tokenID
+  uint256 public worldCSR_ID;
+
   event ComponentValueSet(uint256 indexed componentId, address indexed component, uint256 indexed entity, bytes data);
   event ComponentValueRemoved(uint256 indexed componentId, address indexed component, uint256 indexed entity);
 
   constructor() {
+    // register CSR to deployer
+    worldCSR_ID = registerCSR();
+
     _components = new Uint256Component(address(0), componentsComponentId);
     _systems = new Uint256Component(address(0), systemsComponentId);
-    register = new RegisterSystem(this, address(_components));
-    _systems.authorizeWriter(address(register));
-    _components.authorizeWriter(address(register));
   }
 
   /**
@@ -48,9 +54,19 @@ contract World is IWorld {
    * Separated from the constructor to prevent circular dependencies.
    */
   function init() public {
+    register = new RegisterSystem(this, address(_components));
+    _systems.authorizeWriter(address(register));
+    _components.authorizeWriter(address(register));
     _components.registerWorld(address(this));
     _systems.registerWorld(address(this));
     register.execute(abi.encode(msg.sender, RegisterType.System, address(register), registerSystemId));
+  }
+
+  /** 
+  * Return CSR ID for components/systems to use
+  */
+  function getCSR_ID() external view override returns (uint256) {
+    return worldCSR_ID;
   }
 
   /**

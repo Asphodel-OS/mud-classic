@@ -14,6 +14,10 @@ struct WorldQueryFragment {
 }
 
 interface IWorld {
+
+  // Canto CSR
+  function getCSR_ID() external view returns (uint256);
+
   function components() external view returns (IUint256Component);
 
   function systems() external view returns (IUint256Component);
