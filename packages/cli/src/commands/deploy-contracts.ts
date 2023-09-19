@@ -1,8 +1,6 @@
 import type { Arguments, CommandBuilder } from "yargs";
 import { DeployOptions, generateAndDeploy, hsr } from "../utils";
 import openurl from "openurl";
-import chalk from "chalk";
-import { getSrcDirectory } from "../utils/forgeConfig";
 
 type Options = DeployOptions & {
   watch?: boolean;
@@ -39,21 +37,10 @@ export const handler = async (args: Arguments<Options>): Promise<void> => {
       : undefined);
 
   // Deploy world, components and systems
-  let genDeployResult: Awaited<ReturnType<typeof generateAndDeploy>>;
-  try {
-    genDeployResult = await generateAndDeploy({
-      ...args,
-      deployerPrivateKey,
-    });
-  } catch (e: any) {
-    if (!e.stderr) {
-      // log error if it wasn't piped
-      console.log(e);
-    }
-    console.log(chalk.red("\n-----------\nError during generateAndDeploy (see above)"));
-    process.exit();
-  }
-  const { deployedWorldAddress: worldAddress, initialBlockNumber } = genDeployResult;
+  const { deployedWorldAddress: worldAddress, initialBlockNumber } = await generateAndDeploy({
+    ...args,
+    deployerPrivateKey,
+  });
   console.log("World deployed at", worldAddress, "at block", initialBlockNumber);
 
   if (worldAddress && args.openUrl) {
@@ -65,26 +52,16 @@ export const handler = async (args: Arguments<Options>): Promise<void> => {
   // Set up watcher for system files to redeploy on change
   if (args.watch) {
     const { config, rpc, gasPrice } = args;
-    const srcDir = await getSrcDirectory();
 
-    hsr(srcDir, async (systems: string[]) => {
-      try {
-        return await generateAndDeploy({
-          config,
-          deployerPrivateKey,
-          worldAddress,
-          rpc,
-          systems,
-          gasPrice,
-          reuseComponents: true,
-        });
-      } catch (e: any) {
-        if (!e.stderr) {
-          // log error if it wasn't piped
-          console.log(e);
-        }
-        console.log(chalk.red("\n-----------\nError during generateAndDeploy in HSR (see above)"));
-      }
+    hsr("./src", (systems: string[]) => {
+      return generateAndDeploy({
+        config,
+        deployerPrivateKey,
+        worldAddress,
+        rpc,
+        systems,
+        gasPrice,
+      });
     });
   } else {
     process.exit(0);

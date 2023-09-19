@@ -129,19 +129,19 @@ const getDeployInfo: (args: Arguments<Options>) => Promise<Options> = async (arg
   const answers: Options =
     args.upgradeSystems && !args.world
       ? await inquirer.prompt([
-          {
-            type: "input",
-            name: "world",
-            message: "Provide the address of the World contract to upgrade the systems on.",
-            when: () => args.world == null && config.world == null,
-            validate: (i) => {
-              if (!i || (i[0] == "0" && i[1] == "x" && i.length === 42)) return true;
-              return "Invalid address";
-            },
+        {
+          type: "input",
+          name: "world",
+          message: "Provide the address of the World contract to upgrade the systems on.",
+          when: () => args.world == null && config.world == null,
+          validate: (i) => {
+            if (!i || (i[0] == "0" && i[1] == "x" && i.length === 42)) return true;
+            return "Invalid address";
           },
-        ])
+        },
+      ])
       : args.i
-      ? await inquirer.prompt([
+        ? await inquirer.prompt([
           {
             type: "suggest",
             name: "chainSpec",
@@ -255,14 +255,14 @@ const getDeployInfo: (args: Arguments<Options>) => Promise<Options> = async (arg
             },
           },
         ])
-      : ({} as Options);
+        : ({} as Options);
 
   const chainSpecUrl = args.chainSpec ?? config.chainSpec ?? answers.chainSpec;
   const chainSpec = !chainSpecUrl
     ? null
     : isValidHttpUrl(chainSpecUrl)
-    ? await (await fetch(chainSpecUrl)).json()
-    : JSON.parse(fs.readFileSync(chainSpecUrl, "utf8"));
+      ? await (await fetch(chainSpecUrl)).json()
+      : JSON.parse(fs.readFileSync(chainSpecUrl, "utf8"));
 
   // Priority of config source: command line args >> chainSpec >> local config >> interactive answers >> defaults
   // -> Command line args can override every other config, interactive questions are only asked if no other config given for this option
@@ -324,7 +324,6 @@ export const deploy = async (options: Options) => {
                     rpc: options.rpc!,
                     worldAddress: options.world,
                     deployerPrivateKey: wallet.privateKey,
-                    reuseComponents: options.reuseComponents,
                   });
 
                   ctx.worldAddress = worldAddress = result.deployedWorldAddress;
@@ -409,11 +408,9 @@ export const deploy = async (options: Options) => {
                     options.rpc = getCodespaceUrl(8545);
                   }
 
-                  launcherUrl = `${clientUrl}?chainId=${options.chainId}&worldAddress=${ctx.worldAddress}&rpc=${
-                    options.rpc
-                  }&wsRpc=${options.wsRpc}&initialBlockNumber=${
-                    ctx.initialBlockNumber
-                  }&snapshot=&stream=&relay=&faucet=${options.dev ? "&dev=true" : ""}`;
+                  launcherUrl = `${clientUrl}?chainId=${options.chainId}&worldAddress=${ctx.worldAddress}&rpc=${options.rpc
+                    }&wsRpc=${options.wsRpc}&initialBlockNumber=${ctx.initialBlockNumber
+                    }&snapshot=&stream=&relay=&faucet=${options.dev ? "&dev=true" : ""}`;
 
                   openurl.open(launcherUrl);
                 },

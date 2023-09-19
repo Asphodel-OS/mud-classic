@@ -5,8 +5,6 @@ import { extractIdFromFile } from "./ids";
 import { rmSync, writeFileSync } from "fs";
 import path from "path";
 import { filterAbi, forgeBuild } from "./build";
-import { getOutDirectory, getSrcDirectory } from "./forgeConfig";
-import { systemsDir } from "./constants";
 
 export async function generateAbiTypes(
   inputDir: string,
@@ -33,7 +31,7 @@ export async function generateAbiTypes(
   console.log(`Successfully generated ${result.filesGenerated} files`);
 }
 
-export async function generateSystemTypes(outputDir: string, options?: { clear?: boolean }) {
+export async function generateSystemTypes(inputDir: string, outputDir: string, options?: { clear?: boolean }) {
   if (options?.clear) {
     console.log("Clearing system type output files", outputDir);
     rmSync(path.join(outputDir, "/SystemTypes.ts"), { force: true });
@@ -47,8 +45,7 @@ export async function generateSystemTypes(outputDir: string, options?: { clear?:
   let ids: string[] = [];
   let typePaths: string[] = [];
 
-  const srcDir = await getSrcDirectory();
-  const systemsPath = path.join(srcDir, systemsDir, "*.sol");
+  const systemsPath = `${inputDir}/*.sol`;
 
   const [resolve, , promise] = deferred<void>();
   glob(systemsPath, {}, (_, matches) => {
@@ -129,12 +126,12 @@ ${systems.map((system, index) => `  "${ids[index]}": ${system}.abi,`).join("\n")
 export async function generateTypes(abiDir?: string, outputDir = "./types", options?: { clear?: boolean }) {
   if (!abiDir) {
     console.log("Compiling contracts");
-    const buildOutput = await getOutDirectory();
+    const buildOutput = "./out";
     abiDir = "./abi";
-    await forgeBuild(options);
+    await forgeBuild(buildOutput, options);
     filterAbi(buildOutput, abiDir);
   }
 
   await generateAbiTypes(abiDir, path.join(outputDir, "ethers-contracts"), options);
-  await generateSystemTypes(outputDir, options);
+  await generateSystemTypes("./src/systems", outputDir, options);
 }

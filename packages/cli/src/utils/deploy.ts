@@ -73,7 +73,6 @@ export type DeployOptions = {
   worldAddress?: string;
   rpc: string;
   systems?: string | string[];
-  reuseComponents?: boolean;
   clear?: boolean;
   gasPrice?: number;
 };
@@ -95,11 +94,15 @@ export async function generateAndDeploy(args: DeployOptions) {
       args.deployerPrivateKey,
       args.rpc,
       args.worldAddress,
-      Boolean(args.reuseComponents),
+      Boolean(args.systems),
       args.gasPrice
     );
     deployedWorldAddress = result.deployedWorldAddress;
     initialBlockNumber = result.initialBlockNumber;
+
+    // Extract world address from deploy script
+  } catch (e) {
+    console.error(e);
   } finally {
     // Remove generated LibDeploy
     console.log("Cleaning up deployment script");
