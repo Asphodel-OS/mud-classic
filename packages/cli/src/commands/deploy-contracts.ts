@@ -44,7 +44,6 @@ export const handler = async (args: Arguments<Options>): Promise<void> => {
     genDeployResult = await generateAndDeploy({
       ...args,
       deployerPrivateKey,
-      clear: true,
     });
   } catch (e: any) {
     if (!e.stderr) {
