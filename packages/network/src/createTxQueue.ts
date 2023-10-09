@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { BaseContract, BigNumberish, CallOverrides, Overrides } from "ethers";
+import { BaseContract, BigNumberish, utils, CallOverrides, Overrides } from "ethers";
 import { autorun, computed, IComputedValue, IObservableValue, observable, runInAction } from "mobx";
 import { mapObject, deferred, uuid, awaitValue, cacheUntilReady } from "@latticexyz/utils";
 import { Mutex } from "async-mutex";
@@ -124,12 +124,15 @@ export function createTxQueue<C extends Contracts>(
           nonce,
           gasLimit,
         };
+        console.log("[TXQueue] TXQUEUE EXECUTION", prop, argsWithoutOverrides, configOverrides);
         if (options?.devMode) configOverrides.gasPrice = 0;
 
         // Populate tx
         const populatedTx = await member(...argsWithoutOverrides, configOverrides);
         populatedTx.nonce = nonce;
         populatedTx.chainId = network.config.chainId;
+        // populatedTx.maxPriorityFeePerGas = utils.parseUnits("2", "gwei");
+
 
         // Execute tx
         let hash: string;
@@ -147,7 +150,15 @@ export function createTxQueue<C extends Contracts>(
         }
         const response = target.provider.getTransaction(hash) as Promise<ReturnTypeStrict<typeof target[typeof prop]>>;
         // This promise is awaited asynchronously in the tx queue and the action queue to catch errors
-        const wait = async () => (await response).wait();
+        // const wait = async () => (await response).wait();
+        const wait = async () => {
+          const txConfirmed = await target.provider.waitForTransaction(hash, 1, 8000);
+          if (txConfirmed?.status === 0) {
+            // if tx did not complete, initiate tx.wait() to throw regular error
+            return (await response).wait();
+          }
+          return txConfirmed;
+        };
 
         // Resolved value goes to the initiator of the transaction
         resolve({ hash, wait, response });
