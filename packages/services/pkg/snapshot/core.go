@@ -74,17 +74,14 @@ func Start(
 		case header := <-headers:
 			block, err := client.BlockByHash(context.Background(), header.Hash())
 			if err != nil {
-				// Skip this header since BlockByHash failed in fetching the block.
+				logger.Error("failed to fetch block by hash", zap.Error(err))
 				continue
 			}
 
+			// Retrieve world events from block.
 			blockNumber := block.Number()
-
-			// Get all events in this block.
 			logs := eth.GetAllEventsInBlock(client, blockNumber, worldAddresses)
-
-			// Process and filter out logs.
-			filteredLogs := eth.FilterLogs(logs)
+			logsFiltered := eth.FilterLogs(logs)
 
 			// Print info about block.
 			logger.Info("received block",
@@ -92,12 +89,12 @@ func Start(
 				zap.Uint64("blockNumber", block.Number().Uint64()),
 				zap.String("blockHash", header.Hash().Hex()),
 				zap.Int("countLogs", len(logs)),
-				zap.Int("countLogsAfterFilter", len(filteredLogs)),
+				zap.Int("countLogsAfterFilter", len(logsFiltered)),
 				zap.Int("countTransactions", len(block.Transactions())),
 			)
 
 			// Reduce the logs into the state.
-			state = reduceLogsIntoState(state, filteredLogs)
+			state = reduceLogsIntoState(state, logsFiltered)
 
 			// Take a snapshot every 'SnapshotBlockInterval' blocks.
 			t := new(big.Int)

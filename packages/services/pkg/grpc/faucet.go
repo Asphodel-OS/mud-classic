@@ -309,7 +309,10 @@ func (server *faucetServer) SendNameSystemTransaction(recipientAddress string, r
 	}
 
 	toNameSystemAddress := common.HexToAddress(server.dripConfig.NameSystemAddress)
-	input, err := systems.GetSystemsABI().Pack("executeTyped", common.HexToAddress(recipientAddress).Hash().Big(), recipientUsername)
+
+	address := common.HexToAddress(recipientAddress)
+	addressBigNum := common.BytesToHash(address.Bytes()).Big()
+	input, err := systems.GetSystemsABI().Pack("executeTyped", addressBigNum, recipientUsername)
 	if err != nil {
 		return "", err
 	}

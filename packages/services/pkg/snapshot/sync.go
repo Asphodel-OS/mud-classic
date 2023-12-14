@@ -20,7 +20,13 @@ import (
 // while reducing the state.
 //
 // Returns the entire ECS state once the sync is complete.
-func Sync(client *ethclient.Client, fromBlock *big.Int, toBlock *big.Int, worldAddresses []common.Address, config *SnapshotServerConfig) ChainECSState {
+func Sync(
+	client *ethclient.Client,
+	fromBlock *big.Int,
+	toBlock *big.Int,
+	worldAddresses []common.Address,
+	config *SnapshotServerConfig,
+) ChainECSState {
 	logger := logger.GetLogger()
 	logger.Info("starting initial sync",
 		zap.String("category", "Initial sync"),
@@ -74,7 +80,13 @@ func Sync(client *ethclient.Client, fromBlock *big.Int, toBlock *big.Int, worldA
 	return state
 }
 
-func processEventBatch(client *ethclient.Client, state ChainECSState, startBlock *big.Int, endBlock *big.Int, worldAddresses []common.Address) ChainECSState {
+func processEventBatch(
+	client *ethclient.Client,
+	state ChainECSState,
+	startBlock *big.Int,
+	endBlock *big.Int,
+	worldAddresses []common.Address,
+) ChainECSState {
 	// Fetch all events in the batch range.
 	logger := logger.GetLogger()
 	logger.Info("fetching events",
@@ -89,7 +101,11 @@ func processEventBatch(client *ethclient.Client, state ChainECSState, startBlock
 			zap.Error(err),
 		)
 	}
-	logger.Info("catching up on events", zap.String("category", "Initial sync"), zap.Int("numEvents", len(logs)))
+	logger.Info(
+		"catching up on events",
+		zap.String("category", "Initial sync"),
+		zap.Int("numEvents", len(logs)),
+	)
 
 	// Filter the logs.
 	filteredLogs := eth.FilterLogs(logs)
