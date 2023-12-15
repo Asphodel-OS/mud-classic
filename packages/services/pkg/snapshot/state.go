@@ -83,7 +83,9 @@ func setStateValue(state ECSState, componentId string, entityId string, value []
 }
 
 func deleteStateValue(state ECSState, componentId string, entityId string) ECSState {
-	state[componentId].Delete(entityId)
+	if state[componentId] != nil {
+		state[componentId].Delete(entityId)
+	}
 	return state
 }
 
