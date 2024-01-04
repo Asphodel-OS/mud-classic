@@ -2,9 +2,10 @@ package snapshot
 
 import (
 	"fmt"
-	"io/ioutil"
 	"latticexyz/mud/packages/services/pkg/logger"
 	"latticexyz/mud/packages/services/pkg/utils"
+	pb "latticexyz/mud/packages/services/protobuf/go/ecs-snapshot"
+	"os"
 
 	"go.uber.org/zap"
 )
@@ -14,47 +15,95 @@ const (
 	WorldsFilename string = "./snapshots/SerializedWorlds"   // name for the snapshot binary of Worlds
 )
 
-func getFilenameAtBlock(endBlockNumber uint64) string {
+/////////////////
+// State
+
+func getStateFilenameAtBlock(endBlockNumber uint64) string {
 	return fmt.Sprintf("%s-%d", StateFilename, endBlockNumber)
 }
 
-func getFilenameLatest(worldAddress string) string {
-	// Always lookup a snapshot with a checksummed address, since that is how they are written to
-	// disk.
+// Lookup snapshot with a checksummed address, as written to disk.
+func getWorldStateFilenameLatest(worldAddress string) string {
 	return fmt.Sprintf("%s-latest-%s", StateFilename, utils.ChecksumAddressString(worldAddress))
 }
 
-func readStateAtBlock(blockNumber uint64) []byte {
-	return readState(getFilenameAtBlock(blockNumber))
+func ReadStateAtBlock(blockNumber uint64) ECSState {
+	logger.GetLogger().Info("reading snapshot",
+		zap.String("category", "Snapshot"),
+		zap.Uint64("blockNumber", blockNumber),
+	)
+	return decodeState(readRawStateAtBlock(blockNumber))
 }
 
-func readStateLatest(worldAddress string) []byte {
-	return readState(getFilenameLatest(worldAddress))
+func ReadStateLatest(worldAddress string) ECSState {
+	logger.GetLogger().Info("reading latest snapshot", zap.String("category", "Snapshot"))
+	return decodeState(readRawStateLatest(worldAddress))
 }
 
-func readState(fileName string) []byte {
-	encoding, err := ioutil.ReadFile(fileName)
+// ReadPbStateLatest returns the latest ECS state snapshot in protobuf format.
+func ReadPbStateLatest(worldAddress string) *pb.ECSStateSnapshot {
+	logger.GetLogger().Info("reading latest raw snapshot", zap.String("category", "Snapshot"), zap.String("worldAddress", worldAddress))
+	return decode(readRawStateLatest(worldAddress))
+}
+
+// read state from disk
+func readRawState(fileName string) []byte {
+	encoding, err := os.ReadFile(fileName)
 	if err != nil {
 		logger.GetLogger().Fatal("failed to read encoded state", zap.String("fileName", fileName), zap.Error(err))
 	}
 	return encoding
 }
 
-func writeStateInitialSync(encoding []byte) {
-	filename := fmt.Sprintf("%s-initial-sync", StateFilename)
-	writeState(encoding, filename)
+func readRawStateAtBlock(blockNumber uint64) []byte {
+	return readRawState(getStateFilenameAtBlock(blockNumber))
 }
 
-func writeStateAtBlock(encoding []byte, endBlockNumber uint64) {
-	writeState(encoding, getFilenameAtBlock(endBlockNumber))
+func readRawStateLatest(worldAddress string) []byte {
+	return readRawState(getWorldStateFilenameLatest(worldAddress))
 }
 
-func writeStateLatest(encoding []byte, worldAddress string) {
-	writeState(encoding, getFilenameLatest(worldAddress))
-}
-
-func writeState(encoding []byte, fileName string) {
-	if err := ioutil.WriteFile(fileName, encoding, 0644); err != nil {
+// write state to disk
+func writeRawState(encoding []byte, fileName string) {
+	if err := os.WriteFile(fileName, encoding, 0644); err != nil {
 		logger.GetLogger().Fatal("failed to write ECSState", zap.String("fileName", fileName), zap.Error(err))
 	}
+}
+
+func writeRawStateAtBlock(encoding []byte, endBlockNumber uint64) {
+	writeRawState(encoding, getStateFilenameAtBlock(endBlockNumber))
+}
+
+func writeRawStateInitialSync(encoding []byte) {
+	filename := fmt.Sprintf("%s-initial-sync", StateFilename)
+	writeRawState(encoding, filename)
+}
+
+func writeRawStateLatest(encoding []byte, worldAddress string) {
+	writeRawState(encoding, getWorldStateFilenameLatest(worldAddress))
+}
+
+/////////////////
+// Worlds (addresses)
+
+func writeWorlds(worldAddresses []string) {
+	logger.GetLogger().Info("taking world addresses snapshot",
+		zap.String("category", "Snapshot"),
+		zap.Int("countAdresses", len(worldAddresses)),
+	)
+	encoding := encodeWorldAddresses(worldAddresses)
+
+	if err := os.WriteFile(WorldsFilename, encoding, 0644); err != nil {
+		logger.GetLogger().Fatal("failed to write World addresses state", zap.String("fileName", WorldsFilename), zap.Error(err))
+	}
+}
+
+func readWorlds() []string {
+	if !IsWorldAddressSnapshotAvailable() {
+		return []string{}
+	}
+	encoding := readRawState(WorldsFilename)
+	worlds := decodeWorldAddresses(encoding)
+	worldAddressList := pbToWorldAddresses(worlds)
+	return worldAddressList
 }

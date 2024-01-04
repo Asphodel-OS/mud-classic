@@ -2,7 +2,6 @@ package snapshot
 
 import (
 	"fmt"
-	"io/ioutil"
 	"latticexyz/mud/packages/services/pkg/logger"
 	"latticexyz/mud/packages/services/pkg/utils"
 	pb "latticexyz/mud/packages/services/protobuf/go/ecs-snapshot"
@@ -15,34 +14,35 @@ import (
 	"go.uber.org/zap"
 )
 
-// A SnapshotType distinguishes between snapshot types if those are required.
-type SnapshotType int
+// A Mode distinguishes between snapshot types if those are required.
+type Mode int
 
 const (
-	Latest        SnapshotType = iota // latest available snapshot
-	BlockSpecific                     // snapshot at a specific block
-	InitialSync                       // snapshot taken right after the service has performed a sync
+	Latest        Mode = iota // latest available snapshot
+	BlockSpecific             // snapshot at a specific block
+	InitialSync               // snapshot taken right after the service has performed a sync
 )
 
 // checks whether a state snapshot exists for a given world
 func IsAvailableLatest(worldAddress string) bool {
-	_, err := os.Stat(getFilenameLatest(worldAddress))
+	_, err := os.Stat(getWorldStateFilenameLatest(worldAddress))
 	return err == nil
 }
 
-func typeToName(snapshotType SnapshotType) (string, error) {
-	if snapshotType == Latest {
+func typeToName(mode Mode) (string, error) {
+	if mode == Latest {
 		return "latest", nil
-	} else if snapshotType == BlockSpecific {
+	} else if mode == BlockSpecific {
 		return "block range", nil
-	} else if snapshotType == InitialSync {
+	} else if mode == InitialSync {
 		return "initial sync", nil
 	} else {
-		return "", fmt.Errorf("received unsupported SnapshotType")
+		return "", fmt.Errorf("received unsupported Mode")
 	}
 }
 
-func takeStateSnapshotChain(chainState ChainECSState, startBlockNumber uint64, endBlockNumber uint64, snapshotType SnapshotType) {
+// create a snapshot for all worlds on the given chain and rnage
+func createForAll(chainState ChainECSState, startBlock uint64, endBlock uint64, mode Mode) {
 	logger.GetLogger().Info("taking full chain state snapshot",
 		zap.String("category", "Snapshot"),
 	)
@@ -52,52 +52,33 @@ func takeStateSnapshotChain(chainState ChainECSState, startBlockNumber uint64, e
 		worldAddresses = append(worldAddresses, worldAddress)
 
 		// Serialize the state for a given world and take a snapshot.
-		takeStateSnapshot(ecsStateForWorld, worldAddress, startBlockNumber, endBlockNumber, snapshotType)
+		createForWorld(ecsStateForWorld, worldAddress, startBlock, endBlock, mode)
 	}
 	// Take a snapshot of the world addresses.
-	takeWorldAddressesSnapshot(worldAddresses)
+	writeWorlds(worldAddresses)
 }
 
-func takeStateSnapshot(state ECSState, worldAddress string, startBlockNumber uint64, endBlockNumber uint64, snapshotType SnapshotType) {
-	encoding := encodeState(state, startBlockNumber, endBlockNumber)
+func createForWorld(state ECSState, worldAddress string, startBlock uint64, endBlock uint64, mode Mode) {
+	encoding := encodeState(state, startBlock, endBlock)
 
-	snapshotTypeName, err := typeToName(snapshotType)
+	snapshotTypeName, err := typeToName(mode)
 	if err != nil {
-		logger.GetLogger().Fatal("received an unsupported SnapshotType", zap.Int("snapshotType", int(snapshotType)))
+		logger.GetLogger().Fatal("received an unsupported Mode", zap.Int("mode", int(mode)))
 	}
 	logger.GetLogger().Info("taking snapshot",
 		zap.String("category", "Snapshot"),
 		zap.String("type", snapshotTypeName),
-		zap.Uint64("startBlockNumber", startBlockNumber),
-		zap.Uint64("endBlockNumber", endBlockNumber),
+		zap.Uint64("startBlock", startBlock),
+		zap.Uint64("endBlock", endBlock),
 	)
 
-	if snapshotType == Latest {
-		writeStateLatest(encoding, worldAddress)
-	} else if snapshotType == BlockSpecific {
-		writeStateAtBlock(encoding, endBlockNumber)
-	} else if snapshotType == InitialSync {
-		writeStateInitialSync(encoding)
+	if mode == Latest {
+		writeRawStateLatest(encoding, worldAddress)
+	} else if mode == BlockSpecific {
+		writeRawStateAtBlock(encoding, endBlock)
+	} else if mode == InitialSync {
+		writeRawStateInitialSync(encoding)
 	}
-}
-
-func readStateSnapshotAtBlock(blockNumber uint64) ECSState {
-	logger.GetLogger().Info("reading snapshot",
-		zap.String("category", "Snapshot"),
-		zap.Uint64("blockNumber", blockNumber),
-	)
-	return decodeState(readStateAtBlock(blockNumber))
-}
-
-func readStateSnapshotLatest(worldAddress string) ECSState {
-	logger.GetLogger().Info("reading latest snapshot", zap.String("category", "Snapshot"))
-	return decodeState(readStateLatest(worldAddress))
-}
-
-// RawReadStateSnapshotLatest returns the latest ECS state snapshot in protobuf format.
-func RawReadStateSnapshotLatest(worldAddress string) *pb.ECSStateSnapshot {
-	logger.GetLogger().Info("reading latest raw snapshot", zap.String("category", "Snapshot"), zap.String("worldAddress", worldAddress))
-	return decode(readStateLatest(worldAddress))
 }
 
 // ChunkRawStateSnapshot splits a rawStateSnapshot ECSStateSnapshot in protobuf format into a list
@@ -188,7 +169,7 @@ func ChunkRawStateSnapshot(rawStateSnapshot *pb.ECSStateSnapshot, chunkPercentag
 /// World list state snapshots.
 ///
 
-func worldSnapshotToWorldAddressList(snapshot *pb.Worlds) []string {
+func pbToWorldAddresses(snapshot *pb.Worlds) []string {
 	worldAddresses := []string{}
 	for _, worldAddress := range snapshot.WorldAddress {
 		worldAddresses = append(worldAddresses, worldAddress)
@@ -196,7 +177,7 @@ func worldSnapshotToWorldAddressList(snapshot *pb.Worlds) []string {
 	return worldAddresses
 }
 
-func worldAddressListToWorldsSnapshot(worldAddresses []string) *pb.Worlds {
+func worldAddressesToPB(worldAddresses []string) *pb.Worlds {
 	worlds := &pb.Worlds{}
 
 	for _, worldAddress := range worldAddresses {
@@ -205,32 +186,10 @@ func worldAddressListToWorldsSnapshot(worldAddresses []string) *pb.Worlds {
 	return worlds
 }
 
-func takeWorldAddressesSnapshot(worldAddresses []string) {
-	logger.GetLogger().Info("taking world addresses snapshot",
-		zap.String("category", "Snapshot"),
-		zap.Int("countAdresses", len(worldAddresses)),
-	)
-	encoding := encodeWorldAddresses(worldAddresses)
-
-	if err := ioutil.WriteFile(WorldsFilename, encoding, 0644); err != nil {
-		logger.GetLogger().Fatal("failed to write World addresses state", zap.String("fileName", WorldsFilename), zap.Error(err))
-	}
-}
-
-func readWorldAddressesSnapshot() []string {
-	if !IsWorldAddressSnapshotAvailable() {
-		return []string{}
-	}
-	encoding := readState(WorldsFilename)
-	worlds := decodeWorldAddresses(encoding)
-	worldAddressList := worldSnapshotToWorldAddressList(worlds)
-	return worldAddressList
-}
-
 // RawReadWorldAddressesSnapshot returns a snapshot of all indexed World addresses in protobuf
 // format.
 func RawReadWorldAddressesSnapshot() *pb.Worlds {
-	return decodeWorldAddresses(readState(WorldsFilename))
+	return decodeWorldAddresses(readRawState(WorldsFilename))
 }
 
 // IsWorldAddressSnapshotAvailable returns if a snapshot of all indexed World addresses is

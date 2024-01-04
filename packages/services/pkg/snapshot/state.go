@@ -33,7 +33,7 @@ func getInitialStateChain() (ChainECSState, uint64) {
 	// one-by-one. If there are no worlds that we know of, the initial state
 	// reduces to the empty state.
 	state := getEmptyStateChain()
-	worlds := readWorldAddressesSnapshot()
+	worlds := readWorlds()
 
 	var minBlockOfKnownECSState uint64 = math.MaxUint64
 	min := func(a, b uint64) uint64 {
@@ -63,7 +63,7 @@ func getInitialState(worldAddress string) (ECSState, uint64) {
 		return getEmptyState(), 0
 	}
 
-	stateSnapshot := decode(readStateLatest(worldAddress))
+	stateSnapshot := decode(readRawStateLatest(worldAddress))
 	return toState(stateSnapshot), uint64(stateSnapshot.EndBlockNumber)
 }
 

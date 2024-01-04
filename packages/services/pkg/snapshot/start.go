@@ -101,7 +101,7 @@ func Start(
 			// Take a snapshot every 'SnapshotBlockInterval' blocks.
 			if new(big.Int).Mod(blockNumber, snapshotInterval).Cmp(big.NewInt(0)) == 0 {
 				// TODO: update this to actually only take a snapshot of the selected worlds
-				go takeStateSnapshotChain(state, startBlock.Uint64(), blockNumber.Uint64(), Latest)
+				go createForAll(state, startBlock.Uint64(), blockNumber.Uint64(), Latest)
 			}
 		}
 	}

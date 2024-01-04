@@ -153,7 +153,7 @@ func decode(encoding []byte) *pb.ECSStateSnapshot {
 }
 
 func encodeWorldAddresses(worldAddresses []string) []byte {
-	worlds := worldAddressListToWorldsSnapshot(worldAddresses)
+	worlds := worldAddressesToPB(worldAddresses)
 	encoding, err := proto.Marshal(worlds)
 	if err != nil {
 		logger.GetLogger().Error("failed to encode World addresses", zap.Error(err))

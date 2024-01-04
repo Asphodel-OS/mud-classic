@@ -39,7 +39,7 @@ func (server *ecsSnapshotServer) GetStateLatest(ctx context.Context, in *pb.ECSS
 	if !snapshot.IsAvailableLatest(in.WorldAddress) {
 		return nil, fmt.Errorf("no snapshot")
 	}
-	latestSnapshot := snapshot.RawReadStateSnapshotLatest(in.WorldAddress)
+	latestSnapshot := snapshot.ReadPbStateLatest(in.WorldAddress)
 
 	return &pb.ECSStateReply{
 		State:           latestSnapshot.State,
@@ -57,7 +57,7 @@ func (server *ecsSnapshotServer) GetStateLatestStream(in *pb.ECSStateRequestLate
 	if !snapshot.IsAvailableLatest(in.WorldAddress) {
 		return fmt.Errorf("no snapshot")
 	}
-	latestSnapshot := snapshot.RawReadStateSnapshotLatest(in.WorldAddress)
+	latestSnapshot := snapshot.ReadPbStateLatest(in.WorldAddress)
 
 	// Respond in fraction chunks. If request has specified a chunk percentage, use that value.
 	chunkPercentage := server.config.DefaultSnapshotChunkPercentage
@@ -86,7 +86,7 @@ func (server *ecsSnapshotServer) GetStateLatestStreamPruned(request *pb.ECSState
 	if len(request.PruneAddress) == 0 {
 		return fmt.Errorf("address for which to prune for required")
 	}
-	latestSnapshot := snapshot.RawReadStateSnapshotLatest(request.WorldAddress)
+	latestSnapshot := snapshot.ReadPbStateLatest(request.WorldAddress)
 	latestSnapshotPruned := snapshot.PruneSnapshotOwnedByComponent(latestSnapshot, request.PruneAddress)
 
 	// Respond in fraction chunks. If request has specified a chunk percentage, use that value.
@@ -115,7 +115,7 @@ func (server *ecsSnapshotServer) GetStateBlockLatest(ctx context.Context, in *pb
 	if !snapshot.IsAvailableLatest(in.WorldAddress) {
 		return nil, fmt.Errorf("no snapshot")
 	}
-	latestSnapshot := snapshot.RawReadStateSnapshotLatest(in.WorldAddress)
+	latestSnapshot := snapshot.ReadPbStateLatest(in.WorldAddress)
 
 	return &pb.ECSStateBlockReply{
 		BlockNumber: latestSnapshot.EndBlockNumber,
@@ -134,7 +134,7 @@ func (server *ecsSnapshotServer) GetStateLatestStreamV2(in *pb.ECSStateRequestLa
 	if !snapshot.IsAvailableLatest(in.WorldAddress) {
 		return fmt.Errorf("no snapshot")
 	}
-	latestSnapshot := snapshot.RawReadStateSnapshotLatest(in.WorldAddress)
+	latestSnapshot := snapshot.ReadPbStateLatest(in.WorldAddress)
 
 	// Respond in fraction chunks. If request has specified a chunk percentage, use that value.
 	chunkPercentage := server.config.DefaultSnapshotChunkPercentage
@@ -163,7 +163,7 @@ func (server *ecsSnapshotServer) GetStateLatestStreamPrunedV2(request *pb.ECSSta
 	if len(request.PruneAddress) == 0 {
 		return fmt.Errorf("address for which to prune for required")
 	}
-	latestSnapshot := snapshot.RawReadStateSnapshotLatest(request.WorldAddress)
+	latestSnapshot := snapshot.ReadPbStateLatest(request.WorldAddress)
 	latestSnapshotPruned := snapshot.PruneSnapshotOwnedByComponent(latestSnapshot, request.PruneAddress)
 
 	// Respond in fraction chunks. If request has specified a chunk percentage, use that value.
