@@ -59,12 +59,12 @@ func getInitialStateChain() (ChainECSState, uint64) {
 
 func getInitialState(worldAddress string) (ECSState, uint64) {
 	// Check if a local snapshot is available, and if yes, sync from that.
-	if !IsSnaphotAvailableLatest(worldAddress) {
+	if !IsAvailableLatest(worldAddress) {
 		return getEmptyState(), 0
 	}
 
-	stateSnapshot := decodeSnapshot(readStateLatest(worldAddress))
-	return snapshotToState(stateSnapshot), uint64(stateSnapshot.EndBlockNumber)
+	stateSnapshot := decode(readStateLatest(worldAddress))
+	return toState(stateSnapshot), uint64(stateSnapshot.EndBlockNumber)
 }
 
 func createStateValue(state ECSState, componentId string) ECSState {

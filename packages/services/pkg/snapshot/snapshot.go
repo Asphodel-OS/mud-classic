@@ -1,23 +1,18 @@
 package snapshot
 
 import (
-	"bytes"
 	"fmt"
 	"io/ioutil"
 	"latticexyz/mud/packages/services/pkg/logger"
 	"latticexyz/mud/packages/services/pkg/utils"
 	pb "latticexyz/mud/packages/services/protobuf/go/ecs-snapshot"
-	"sync"
 
 	"math"
 	"os"
-	"sort"
 	"time"
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/crypto"
 	"go.uber.org/zap"
-	"google.golang.org/protobuf/proto"
 )
 
 // A SnapshotType distinguishes between snapshot types if those are required.
@@ -29,7 +24,13 @@ const (
 	InitialSync                       // snapshot taken right after the service has performed a sync
 )
 
-func snapshotTypeToName(snapshotType SnapshotType) (string, error) {
+// checks whether a state snapshot exists for a given world
+func IsAvailableLatest(worldAddress string) bool {
+	_, err := os.Stat(getFilenameLatest(worldAddress))
+	return err == nil
+}
+
+func typeToName(snapshotType SnapshotType) (string, error) {
 	if snapshotType == Latest {
 		return "latest", nil
 	} else if snapshotType == BlockSpecific {
@@ -39,195 +40,6 @@ func snapshotTypeToName(snapshotType SnapshotType) (string, error) {
 	} else {
 		return "", fmt.Errorf("received unsupported SnapshotType")
 	}
-}
-
-func IsSnaphotAvailableLatest(worldAddress string) bool {
-	_, err := os.Stat(getSnapshotFilenameLatest(worldAddress))
-	return err == nil
-}
-
-func getSnapshotFilenameInitialSync() string {
-	return fmt.Sprintf("%s-initial-sync", SerializedStateFilename)
-}
-
-func getSnapshotFilenameAtBlock(endBlockNumber uint64) string {
-	return fmt.Sprintf("%s-%d", SerializedStateFilename, endBlockNumber)
-}
-
-func getSnapshotFilenameLatest(worldAddress string) string {
-	// Always lookup a snapshot with a checksummed address, since that is how they are written to
-	// disk.
-	return fmt.Sprintf("%s-latest-%s", SerializedStateFilename, utils.ChecksumAddressString(worldAddress))
-}
-
-func encodeState(state ECSState, startBlockNumber uint64, endBlockNumber uint64) []byte {
-	stateSnapshot := stateToSnapshot(state, startBlockNumber, endBlockNumber)
-	encoding, err := proto.Marshal(stateSnapshot)
-	if err != nil {
-		logger.GetLogger().Error("failed to encode ECSState", zap.Error(err))
-	}
-	return encoding
-}
-
-func decodeState(encoding []byte) ECSState {
-	stateSnapshot := decodeSnapshot(encoding)
-	state := snapshotToState(stateSnapshot)
-	return state
-}
-
-func decodeSnapshot(encoding []byte) *pb.ECSStateSnapshot {
-	stateSnapshot := &pb.ECSStateSnapshot{}
-	if err := proto.Unmarshal(encoding, stateSnapshot); err != nil {
-		logger.GetLogger().Error("failed to decode ECSState", zap.Error(err))
-	}
-	return stateSnapshot
-}
-
-func stateToSnapshot(state ECSState, startBlockNumber uint64, endBlockNumber uint64) *pb.ECSStateSnapshot {
-	stateSnapshot := &pb.ECSStateSnapshot{}
-
-	var rawStateBuffer bytes.Buffer
-	tsStart := time.Now()
-
-	// List of components and entities strings. We pad by one to avoid protobufs omitting
-	// our data.
-	components := []string{"0x0"}
-	entities := []string{"0x0"}
-
-	// Map of components / entities to their position in an array. This helps us
-	// assign the correct values to the ECSState slices as we build the snapshot.
-	componentToIdx := map[string]uint32{}
-	entitiyToIdx := map[string]uint32{}
-
-	// Indexes tracking the position of every component and entity in the array.
-	componentIdx := uint32(1)
-	entityIdx := uint32(1)
-
-	componentKeys := []string{}
-	for k := range state {
-		componentKeys = append(componentKeys, k)
-	}
-	sort.Strings(componentKeys)
-
-	for _, componentId := range componentKeys {
-		_state := state[componentId]
-
-		if _, ok := componentToIdx[componentId]; !ok {
-			components = append(components, componentId)
-			componentToIdx[componentId] = componentIdx
-			componentIdx++
-		}
-
-		entityKeys := []string{}
-		_state.Range(func(key, value interface{}) bool {
-			keyString, ok := key.(string)
-			if ok {
-				entityKeys = append(entityKeys, keyString)
-			}
-			return true
-		})
-
-		sort.Strings(entityKeys)
-
-		for _, entityId := range entityKeys {
-			value, ok := _state.Load(entityId)
-			if !ok {
-				logger.GetLogger().Error("did not find value in map for key", zap.String("key", entityId))
-				continue
-			}
-			valueBytes, ok := value.([]byte)
-			if !ok {
-				logger.GetLogger().Fatal("value data type expected to be []byte", zap.Any("value", value))
-			}
-
-			if _, ok := entitiyToIdx[entityId]; !ok {
-				entities = append(entities, entityId)
-				entitiyToIdx[entityId] = entityIdx
-				entityIdx++
-			}
-
-			stateSlice := &pb.ECSState{
-				ComponentIdIdx: componentToIdx[componentId],
-				EntityIdIdx:    entitiyToIdx[entityId],
-				Value:          valueBytes,
-			}
-			stateSnapshot.State = append(stateSnapshot.State, stateSlice)
-
-			rawStateBuffer.WriteString(componentId)
-			rawStateBuffer.WriteString(entityId)
-			rawStateBuffer.Write(valueBytes)
-		}
-	}
-
-	stateSnapshot.StateComponents = components
-	stateSnapshot.StateEntities = entities
-	stateSnapshot.StateHash = crypto.Keccak256Hash(rawStateBuffer.Bytes()).String()
-
-	stateSnapshot.StartBlockNumber = uint32(startBlockNumber)
-	stateSnapshot.EndBlockNumber = uint32(endBlockNumber)
-
-	tsElapsed := time.Since(tsStart)
-	logger.GetLogger().Info("computed hash of snapshot", zap.String("category", "Snapshot"), zap.String("keccak256Hash", stateSnapshot.StateHash), zap.String("timeTaken", tsElapsed.String()))
-
-	return stateSnapshot
-}
-
-func snapshotToState(stateSnapshot *pb.ECSStateSnapshot) ECSState {
-	state := getEmptyState()
-
-	components := stateSnapshot.StateComponents
-	entities := stateSnapshot.StateEntities
-
-	for _, stateSlice := range stateSnapshot.State {
-		// First read the indexes from the snapshot, then lookup the actual
-		// component / entity id values from the array.
-		componentIdIdx := stateSlice.ComponentIdIdx
-		entityIdIdx := stateSlice.EntityIdIdx
-		value := stateSlice.Value
-
-		componentId := components[componentIdIdx]
-		entityId := entities[entityIdIdx]
-
-		if _, ok := state[componentId]; !ok {
-			state[componentId] = &sync.Map{}
-		}
-		state[componentId].Store(entityId, value)
-	}
-	return state
-}
-
-func writeStateInitialSync(encoding []byte) {
-	writeState(encoding, getSnapshotFilenameInitialSync())
-}
-
-func writeStateAtBlock(encoding []byte, endBlockNumber uint64) {
-	writeState(encoding, getSnapshotFilenameAtBlock(endBlockNumber))
-}
-
-func writeStateLatest(encoding []byte, worldAddress string) {
-	writeState(encoding, getSnapshotFilenameLatest(worldAddress))
-}
-
-func writeState(encoding []byte, fileName string) {
-	if err := ioutil.WriteFile(fileName, encoding, 0644); err != nil {
-		logger.GetLogger().Fatal("failed to write ECSState", zap.String("fileName", fileName), zap.Error(err))
-	}
-}
-
-func readStateAtBlock(blockNumber uint64) []byte {
-	return readState(getSnapshotFilenameAtBlock(blockNumber))
-}
-
-func readStateLatest(worldAddress string) []byte {
-	return readState(getSnapshotFilenameLatest(worldAddress))
-}
-
-func readState(fileName string) []byte {
-	encoding, err := ioutil.ReadFile(fileName)
-	if err != nil {
-		logger.GetLogger().Fatal("failed to read encoded state", zap.String("fileName", fileName), zap.Error(err))
-	}
-	return encoding
 }
 
 func takeStateSnapshotChain(chainState ChainECSState, startBlockNumber uint64, endBlockNumber uint64, snapshotType SnapshotType) {
@@ -249,7 +61,7 @@ func takeStateSnapshotChain(chainState ChainECSState, startBlockNumber uint64, e
 func takeStateSnapshot(state ECSState, worldAddress string, startBlockNumber uint64, endBlockNumber uint64, snapshotType SnapshotType) {
 	encoding := encodeState(state, startBlockNumber, endBlockNumber)
 
-	snapshotTypeName, err := snapshotTypeToName(snapshotType)
+	snapshotTypeName, err := typeToName(snapshotType)
 	if err != nil {
 		logger.GetLogger().Fatal("received an unsupported SnapshotType", zap.Int("snapshotType", int(snapshotType)))
 	}
@@ -285,7 +97,7 @@ func readStateSnapshotLatest(worldAddress string) ECSState {
 // RawReadStateSnapshotLatest returns the latest ECS state snapshot in protobuf format.
 func RawReadStateSnapshotLatest(worldAddress string) *pb.ECSStateSnapshot {
 	logger.GetLogger().Info("reading latest raw snapshot", zap.String("category", "Snapshot"), zap.String("worldAddress", worldAddress))
-	return decodeSnapshot(readStateLatest(worldAddress))
+	return decode(readStateLatest(worldAddress))
 }
 
 // ChunkRawStateSnapshot splits a rawStateSnapshot ECSStateSnapshot in protobuf format into a list
@@ -393,23 +205,6 @@ func worldAddressListToWorldsSnapshot(worldAddresses []string) *pb.Worlds {
 	return worlds
 }
 
-func encodeWorldAddresses(worldAddresses []string) []byte {
-	worlds := worldAddressListToWorldsSnapshot(worldAddresses)
-	encoding, err := proto.Marshal(worlds)
-	if err != nil {
-		logger.GetLogger().Error("failed to encode World addresses", zap.Error(err))
-	}
-	return encoding
-}
-
-func decodeWorldAddresses(encoding []byte) *pb.Worlds {
-	worldsSnapshot := &pb.Worlds{}
-	if err := proto.Unmarshal(encoding, worldsSnapshot); err != nil {
-		logger.GetLogger().Error("failed to decode World addresses snapshot", zap.Error(err))
-	}
-	return worldsSnapshot
-}
-
 func takeWorldAddressesSnapshot(worldAddresses []string) {
 	logger.GetLogger().Info("taking world addresses snapshot",
 		zap.String("category", "Snapshot"),
@@ -417,8 +212,8 @@ func takeWorldAddressesSnapshot(worldAddresses []string) {
 	)
 	encoding := encodeWorldAddresses(worldAddresses)
 
-	if err := ioutil.WriteFile(SerializedWorldsFilename, encoding, 0644); err != nil {
-		logger.GetLogger().Fatal("failed to write World addresses state", zap.String("fileName", SerializedWorldsFilename), zap.Error(err))
+	if err := ioutil.WriteFile(WorldsFilename, encoding, 0644); err != nil {
+		logger.GetLogger().Fatal("failed to write World addresses state", zap.String("fileName", WorldsFilename), zap.Error(err))
 	}
 }
 
@@ -426,7 +221,7 @@ func readWorldAddressesSnapshot() []string {
 	if !IsWorldAddressSnapshotAvailable() {
 		return []string{}
 	}
-	encoding := readState(SerializedWorldsFilename)
+	encoding := readState(WorldsFilename)
 	worlds := decodeWorldAddresses(encoding)
 	worldAddressList := worldSnapshotToWorldAddressList(worlds)
 	return worldAddressList
@@ -435,13 +230,13 @@ func readWorldAddressesSnapshot() []string {
 // RawReadWorldAddressesSnapshot returns a snapshot of all indexed World addresses in protobuf
 // format.
 func RawReadWorldAddressesSnapshot() *pb.Worlds {
-	return decodeWorldAddresses(readState(SerializedWorldsFilename))
+	return decodeWorldAddresses(readState(WorldsFilename))
 }
 
 // IsWorldAddressSnapshotAvailable returns if a snapshot of all indexed World addresses is
 // available.
 func IsWorldAddressSnapshotAvailable() bool {
-	_, err := os.Stat(SerializedWorldsFilename)
+	_, err := os.Stat(WorldsFilename)
 	return err == nil
 }
 

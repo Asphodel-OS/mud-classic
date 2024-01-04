@@ -49,6 +49,8 @@ func Start(
 		logger.Fatal("failed to subscribe to new blockchain head", zap.Error(err))
 	}
 
+	snapshotInterval := big.NewInt(config.SnapshotBlockInterval)
+
 	for {
 		select {
 		case err := <-sub.Err():
@@ -97,8 +99,8 @@ func Start(
 			state = reduceLogsIntoState(state, logsFiltered)
 
 			// Take a snapshot every 'SnapshotBlockInterval' blocks.
-			t := new(big.Int)
-			if t.Mod(blockNumber, big.NewInt(config.SnapshotBlockInterval)).Cmp(big.NewInt(0)) == 0 {
+			if new(big.Int).Mod(blockNumber, snapshotInterval).Cmp(big.NewInt(0)) == 0 {
+				// TODO: update this to actually only take a snapshot of the selected worlds
 				go takeStateSnapshotChain(state, startBlock.Uint64(), blockNumber.Uint64(), Latest)
 			}
 		}
