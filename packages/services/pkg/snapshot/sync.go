@@ -63,7 +63,7 @@ func Sync(
 		time.Sleep(config.InitialSyncBlockBatchSyncTimeout)
 		// Take an in-progress snapshot up to the block number that has so far been loaded.
 		// if block%config.InitialSyncSnapshotInterval == 0 {
-		// 	go takeStateSnapshotChain(state, uint64(block), uint64(block+config.InitialSyncBlockBatchSize), InitialSync)
+		// 	go createForAll(state, uint64(block), uint64(block+config.InitialSyncBlockBatchSize), InitialSync)
 		// }
 	}
 
@@ -75,7 +75,7 @@ func Sync(
 
 	// Once the state is reduced, create a snapshot on disk which will later be merged with the
 	// up-to-date state.
-	go takeStateSnapshotChain(state, fromBlock.Uint64(), toBlock.Uint64(), InitialSync)
+	go createForAll(state, fromBlock.Uint64(), toBlock.Uint64(), InitialSync)
 
 	return state
 }

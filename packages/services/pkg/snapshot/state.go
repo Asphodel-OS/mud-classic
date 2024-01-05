@@ -33,7 +33,7 @@ func getInitialStateChain() (ChainECSState, uint64) {
 	// one-by-one. If there are no worlds that we know of, the initial state
 	// reduces to the empty state.
 	state := getEmptyStateChain()
-	worlds := readWorldAddressesSnapshot()
+	worlds := readWorlds()
 
 	var minBlockOfKnownECSState uint64 = math.MaxUint64
 	min := func(a, b uint64) uint64 {
@@ -59,12 +59,12 @@ func getInitialStateChain() (ChainECSState, uint64) {
 
 func getInitialState(worldAddress string) (ECSState, uint64) {
 	// Check if a local snapshot is available, and if yes, sync from that.
-	if !IsSnaphotAvailableLatest(worldAddress) {
+	if !IsAvailableLatest(worldAddress) {
 		return getEmptyState(), 0
 	}
 
-	stateSnapshot := decodeSnapshot(readStateLatest(worldAddress))
-	return snapshotToState(stateSnapshot), uint64(stateSnapshot.EndBlockNumber)
+	stateSnapshot := decode(readRawStateLatest(worldAddress))
+	return toState(stateSnapshot), uint64(stateSnapshot.EndBlockNumber)
 }
 
 func createStateValue(state ECSState, componentId string) ECSState {
