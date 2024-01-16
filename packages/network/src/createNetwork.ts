@@ -18,8 +18,9 @@ export type Network = Awaited<ReturnType<typeof createNetwork>>;
  * @returns Network object
  */
 export async function createNetwork(initialConfig: NetworkConfig) {
-  const config = observable(initialConfig);
   const disposers: (() => void)[] = [];
+
+  const config = observable(initialConfig);
   const {
     providers,
     connected,
@@ -37,9 +38,11 @@ export async function createNetwork(initialConfig: NetworkConfig) {
 
   // Get address
   const initialConnectedAddress = config.provider.externalProvider ? await signer.get()?.getAddress() : undefined;
+
   const connectedAddress = computed(() =>
     config.privateKey ? new Wallet(config.privateKey).address.toLowerCase() : initialConnectedAddress?.toLowerCase()
   );
+
   const connectedAddressChecksummed = computed(() =>
     config.privateKey ? new Wallet(config.privateKey).address : initialConnectedAddress
   );
@@ -48,17 +51,19 @@ export async function createNetwork(initialConfig: NetworkConfig) {
   const { blockNumber$, dispose: disposeBlockNumberStream } = createBlockNumberStream(providers);
   disposers.push(disposeBlockNumberStream);
 
-  // Create local clock
+  // Create local clock subscription
   const clock = createClock(config.clock);
   disposers.push(clock.dispose);
 
   // Sync the local time to the chain time in regular intervals
-  const syncBlockSub = combineLatest([blockNumber$, computedToStream(providers)])
+  const combinedObservable = combineLatest([blockNumber$, computedToStream(providers)]);
+  const blockFetcher = concatMap(([blockNumber, currentProviders]) =>
+    currentProviders ? fetchBlock(currentProviders.json, blockNumber) : EMPTY
+  );
+  const syncBlockSub = combinedObservable
     .pipe(
-      throttleTime(config.clock.syncInterval, undefined, { leading: true, trailing: true }),
-      concatMap(([blockNumber, currentProviders]) =>
-        currentProviders ? fetchBlock(currentProviders.json, blockNumber) : EMPTY
-      ), // Fetch the latest block if a provider is available
+      throttleTime(config.clock.syncInterval, undefined, { leading: true, trailing: true }), // ignore if clock already defined
+      blockFetcher, // Fetch the latest block if a provider is available
       map((block) => block.timestamp * 1000), // Map to timestamp in ms
       filter((blockTimestamp) => blockTimestamp !== clock.lastUpdateTime), // Ignore if the clock was already refreshed with this block
       filter((blockTimestamp) => blockTimestamp !== clock.currentTime) // Ignore if the current local timestamp is correct

@@ -141,7 +141,7 @@ func StartStreamServer(grpcPort int, metricsPort int, ethclient *ethclient.Clien
 	go startHTTPServer(createWebGrpcServerWithWebsockets(grpcServer), grpcPort+1, logger)
 }
 
-// StartStreamServer starts a gRPC server and a HTTP web-gRPC server wrapper for an ECS snapshot
+// StartSnapshotServer starts a gRPC server and a HTTP web-gRPC server wrapper for an ECS snapshot
 // service. The gRPC server is started at port and HTTP server at port + 1.
 func StartSnapshotServer(grpcPort int, metricsPort int, config *snapshot.SnapshotServerConfig, logger *zap.Logger) {
 	// Create gRPC server.

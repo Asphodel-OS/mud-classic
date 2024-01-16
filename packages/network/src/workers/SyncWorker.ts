@@ -206,11 +206,11 @@ export class SyncWorker<C extends Components> implements DoWork<Input, NetworkEv
     this.setLoadingState({ percentage: 50 });
     const snapshotBlockNumber = await getSnapshotBlockNumber(snapshotClient, worldContract.address);
     this.setLoadingState({ percentage: 100 });
-    debug(
-      `cache block: ${cacheBlockNumber}, snapshot block: ${
-        snapshotBlockNumber > 0 ? snapshotBlockNumber : "Unavailable"
-      }, start sync at ${initialBlockNumber}`
-    );
+    debug(`
+      cache block: ${cacheBlockNumber}, 
+      snapshot block: ${snapshotBlockNumber > 0 ? snapshotBlockNumber : "Unavailable"}, 
+      start sync at ${initialBlockNumber}
+    `);
 
     let initialState = createCacheStore();
     if (initialBlockNumber > Math.max(cacheBlockNumber, snapshotBlockNumber)) {
