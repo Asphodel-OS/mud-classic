@@ -20,6 +20,7 @@ export async function createRelayStream(signer: Signer, url: string, id: string)
   const recoverWorker = await spawn(
     new Worker(new URL("./workers/Recover.worker.ts", import.meta.url), { type: "module" })
   );
+  console.log({recoverWorker})
 
   // Signature that should be used to prove identity
   const signature = { signature: await signer.signMessage("ecs-relay-service") };
