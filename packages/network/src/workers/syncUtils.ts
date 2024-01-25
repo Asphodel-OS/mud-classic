@@ -11,7 +11,7 @@ import {
   ECSStateReplyV2,
   ECSStateSnapshotServiceClient,
   ECSStateSnapshotServiceDefinition,
-} from "@latticexyz/services/protobuf/ts/ecs-snapshot/ecs-snapshot";
+} from "../types/ecs-snapshot/ecs-snapshot";
 import {
   NetworkComponentUpdate,
   ContractConfig,
@@ -28,7 +28,7 @@ import {
   ECSStreamBlockBundleReply,
   ECSStreamServiceClient,
   ECSStreamServiceDefinition,
-} from "@latticexyz/services/protobuf/ts/ecs-stream/ecs-stream";
+} from "../types/ecs-stream/ecs-stream";
 import { createChannel, createClient } from "nice-grpc-web";
 import { formatComponentID, formatEntityID } from "../utils";
 import { grpc } from "@improbable-eng/grpc-web";

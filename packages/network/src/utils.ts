@@ -1,7 +1,8 @@
-import { EntityID } from "@latticexyz/recs";
-import { Message } from "@latticexyz/services/protobuf/ts/ecs-relay/ecs-relay";
 import { BigNumber } from "ethers";
 import { keccak256 } from "ethers/lib/utils";
+import { EntityID } from "@latticexyz/recs";
+
+import { Message } from "./types/ecs-relay/ecs-relay";
 
 // Message payload to sign and use to recover signer
 export function messagePayload(msg: Message) {

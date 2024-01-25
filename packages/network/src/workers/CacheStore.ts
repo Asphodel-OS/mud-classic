@@ -1,8 +1,8 @@
 import { Components, ComponentValue, EntityID, SchemaOf } from "@latticexyz/recs";
 import { packTuple, transformIterator, unpackTuple } from "@latticexyz/utils";
 import { initCache } from "../initCache";
-import { ECSStateReply } from "@latticexyz/services/protobuf/ts/ecs-snapshot/ecs-snapshot";
 import { NetworkComponentUpdate, NetworkEvents } from "../types";
+import { ECSStateReply } from "../types/ecs-snapshot/ecs-snapshot";
 import { formatEntityID } from "../utils";
 import { debug as parentDebug } from "./debug";
 
