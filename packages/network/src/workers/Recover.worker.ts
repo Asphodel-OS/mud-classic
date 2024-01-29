@@ -1,6 +1,7 @@
-import { Message } from "@latticexyz/services/protobuf/ts/ecs-relay/ecs-relay";
-import { expose } from "threads";
 import { verifyMessage } from "ethers/lib/utils";
+import { expose } from "threads";
+
+import { Message } from "../types/ecs-relay/ecs-relay";
 import { messagePayload } from "../utils";
 
 function recoverAddress(msg: Message) {
