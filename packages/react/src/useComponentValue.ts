@@ -8,7 +8,7 @@ import {
   isComponentUpdate,
   Metadata,
   Schema,
-} from "@latticexyz/recs";
+} from "@mud-classic/recs";
 import { useEffect, useState } from "react";
 
 export function useComponentValue<S extends Schema>(
