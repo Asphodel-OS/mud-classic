@@ -1,3 +1,3 @@
-# @latticexyz/utils
+# @mud-classic/utils
 
 Useful utilities for everyday use
