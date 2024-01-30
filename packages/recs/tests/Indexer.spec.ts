@@ -11,7 +11,7 @@ import {
 import { createIndexer } from "../src/Indexer";
 import { Type } from "../src/constants";
 import { createEntity } from "../src/Entity";
-import { AnyComponent, EntityID, EntityIndex, World } from "../src/types";
+import { AnyComponent, EntityIndex, World } from "../src/types";
 import { createWorld } from "../src/World";
 
 describe("Indexer", () => {

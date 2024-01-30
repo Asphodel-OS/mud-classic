@@ -1,6 +1,6 @@
 import { filterNullish } from "@mud-classic/utils";
 import { observable, ObservableSet } from "mobx";
-import { concat, concatMap, filter, from, map, merge, Observable, Observer, of, Subject } from "rxjs";
+import { concat, concatMap, filter, from, map, merge, Observable, of, Subject } from "rxjs";
 import {
   componentValueEquals,
   getComponentEntities,
