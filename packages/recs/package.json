@@ -17,8 +17,8 @@
     "build": "tsup src/index.ts --format cjs,esm --dts-resolve --minify --clean --sourcemap --legacy-output",
     "dev": "tsup src/index.ts --format cjs,esm --dts-resolve --watch --sourcemap --legacy-output",
     "lint": "eslint . --ext .ts",
-    "nuke": "rimraf pnpm-lock.yaml node_modules/ dist/",
-    "test": "tsc && jest"
+    "nuke": "rimraf node_modules/ dist/",
+    "test": "pnpm run build && jest"
   },
   "dependencies": {
     "@mud-classic/utils": "^0.0.1",
@@ -33,7 +33,7 @@
     "rimraf": "^3.0.2",
     "ts-jest": "^27.1.3",
     "tslib": "^2.3.1",
-    "typescript": "^5.3.3"
+    "typescript": "^4.5.5"
   },
   "publishConfig": {
     "access": "public"
