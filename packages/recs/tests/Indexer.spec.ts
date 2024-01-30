@@ -7,7 +7,6 @@ import {
   withValue,
   componentValueEquals,
   getEntitiesWithValue,
-  overridableComponent,
 } from "../src/Component";
 import { createIndexer } from "../src/Indexer";
 import { Type } from "../src/constants";
@@ -180,109 +179,6 @@ describe("Indexer", () => {
 
       setComponent(PositionIndexer, entity1, { x: 2, y: 2 });
       expect(getEntitiesWithValue(PositionIndexer, { x: 1, y: 2 })).toEqual(new Set([entity2, entity3]));
-    });
-  });
-
-  describe("overridableComponent", () => {
-    it("should return a overridable component", () => {
-      const Position = defineComponent(world, { x: Type.Number, y: Type.Number }, { indexed: true });
-      const OverridablePosition = overridableComponent(Position);
-      expect("addOverride" in OverridablePosition).toBe(true);
-      expect("addOverride" in OverridablePosition).toBe(true);
-    });
-
-    it("should mirror all values of the source component", () => {
-      const Position = defineComponent(world, { x: Type.Number, y: Type.Number }, { indexed: true });
-      const entity1 = createEntity(world);
-      setComponent(Position, entity1, { x: 1, y: 2 });
-
-      const OverridablePosition = overridableComponent(Position);
-      expect(getComponentValue(OverridablePosition, entity1)).toEqual({ x: 1, y: 2 });
-    });
-
-    it("the overridable component should be updated if the original component is updated", () => {
-      const Position = defineComponent(world, { x: Type.Number, y: Type.Number }, { indexed: true });
-      const entity1 = createEntity(world);
-      setComponent(Position, entity1, { x: 1, y: 2 });
-
-      const OverridableComponent = overridableComponent(Position);
-
-      setComponent(Position, entity1, { x: 2, y: 2 });
-      expect(getComponentValue(OverridableComponent, entity1)).toEqual({ x: 2, y: 2 });
-
-      const entity2 = createEntity(world, [withValue(Position, { x: 3, y: 3 })]);
-      expect(getComponentValue(OverridableComponent, entity2)).toEqual({ x: 3, y: 3 });
-    });
-
-    it("should return the updated component value if there is a relevant update for the given entity", () => {
-      const Position = defineComponent(world, { x: Type.Number, y: Type.Number }, { indexed: true });
-      const entity1 = createEntity(world);
-      const entity2 = createEntity(world);
-      setComponent(Position, entity1, { x: 1, y: 2 });
-      setComponent(Position, entity2, { x: 5, y: 6 });
-
-      const OverridableComponent = overridableComponent(Position);
-      OverridableComponent.addOverride("firstOverride" as EntityID, { entity: entity1, value: { x: 2, y: 3 } });
-      expect(getComponentValue(OverridableComponent, entity1)).toEqual({ x: 2, y: 3 });
-      expect(getComponentValue(OverridableComponent, entity2)).toEqual({ x: 5, y: 6 });
-
-      OverridableComponent.addOverride("secondOverride" as EntityID, { entity: entity1, value: { x: 3, y: 3 } });
-      expect(getComponentValue(OverridableComponent, entity1)).toEqual({ x: 3, y: 3 });
-
-      OverridableComponent.removeOverride("secondOverride" as EntityID);
-      expect(getComponentValue(OverridableComponent, entity1)).toEqual({ x: 2, y: 3 });
-
-      setComponent(Position, entity1, { x: 10, y: 20 });
-      expect(getComponentValue(OverridableComponent, entity1)).toEqual({ x: 2, y: 3 });
-
-      OverridableComponent.removeOverride("firstOverride" as EntityID);
-      expect(getComponentValue(OverridableComponent, entity1)).toEqual({ x: 10, y: 20 });
-    });
-
-    it("adding an override should trigger reactions depending on the getComponentValue of the overriden component", () => {
-      const Position = defineComponent(world, { x: Type.Number, y: Type.Number }, { indexed: true });
-      const entity1 = createEntity(world);
-      setComponent(Position, entity1, { x: 1, y: 2 });
-
-      const OverridablePosition = overridableComponent(Position);
-
-      const spy = jest.fn();
-      OverridablePosition.update$.subscribe(spy);
-
-      expect(spy).toHaveBeenCalledTimes(0);
-
-      OverridablePosition.addOverride("firstOverride" as EntityID, { entity: entity1, value: { x: 3, y: 3 } });
-      expect(spy).toHaveBeenCalledTimes(1);
-      expect(spy).toHaveBeenLastCalledWith({
-        entity: entity1,
-        component: OverridablePosition,
-        value: [
-          { x: 3, y: 3 },
-          { x: 1, y: 2 },
-        ],
-      });
-
-      OverridablePosition.removeOverride("firstOverride" as EntityID);
-      expect(spy).toHaveBeenCalledTimes(2);
-      expect(spy).toHaveBeenLastCalledWith({
-        entity: entity1,
-        component: OverridablePosition,
-        value: [
-          { x: 1, y: 2 },
-          { x: 3, y: 3 },
-        ],
-      });
-
-      OverridablePosition.addOverride("secondOverride" as EntityID, {
-        entity: 42 as EntityIndex,
-        value: { x: 2, y: 3 },
-      });
-      expect(spy).toHaveBeenLastCalledWith({
-        entity: 42,
-        component: OverridablePosition,
-        value: [{ x: 2, y: 3 }, undefined],
-      });
-      expect(spy).toHaveBeenCalledTimes(3);
     });
   });
 });

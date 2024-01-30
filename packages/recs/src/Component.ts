@@ -1,6 +1,6 @@
-import { uuid } from "@latticexyz/utils";
-import { mapObject } from "@latticexyz/utils";
-import { filter, Subject } from "rxjs";
+import { mapObject, uuid } from "@mud-classic/utils";
+import { Subject } from "rxjs";
+
 import { OptionalTypes } from "./constants";
 import { createIndexer } from "./Indexer";
 import {
@@ -10,8 +10,6 @@ import {
   EntityIndex,
   Indexer,
   Metadata,
-  OverridableComponent,
-  Override,
   Schema,
   World,
 } from "./types";
@@ -263,137 +261,6 @@ export function getComponentEntities<S extends Schema, T = undefined>(
   component: Component<S, Metadata, T>
 ): IterableIterator<EntityIndex> {
   return component.entities();
-}
-
-/**
- * An overridable component is a mirror of the source component, with functions to lazily override specific entity values.
- * Lazily override means the values are not actually set to the source component, but the override is only returned if the value is read.
- *
- * - When an override for an entity is added to the component, the override is propagated via the component's `update$` stream.
- * - While an override is set for a specific entity, no updates to the source component for this entity will be propagated to the `update$` stream.
- * - When an override is removed for a specific entity and there are more overrides targeting this entity,
- * the override with the highest nonce will be propagated to the `update$` stream.
- * - When an override is removed for a specific entity and there are no more overrides targeting this entity,
- * the non-overridden underlying component value of this entity will be propagated to the `update$` stream.
- *
- * @param component {@link defineComponent Component} to use as underlying source for the overridable component
- * @returns overridable component
- */
-export function overridableComponent<S extends Schema, M extends Metadata, T = undefined>(
-  component: Component<S, M, T>
-): OverridableComponent<S, M, T> {
-  let nonce = 0;
-
-  // Map from OverrideId to Override (to be able to add multiple overrides to the same Entity)
-  const overrides = new Map<string, { update: Override<S, T>; nonce: number }>();
-
-  // Map from EntityIndex to current overridden component value
-  const overriddenEntityValues = new Map<EntityIndex, Partial<ComponentValue<S, T>> | null>();
-
-  // Update event stream that takes into account overridden entity values
-  const update$ = new Subject<{
-    entity: EntityIndex;
-    value: [ComponentValue<S, T> | undefined, ComponentValue<S, T> | undefined];
-    component: Component<S, Metadata, T>;
-  }>();
-
-  // Channel through update events from the original component if there are no overrides
-  component.update$.pipe(filter((e) => !overriddenEntityValues.get(e.entity))).subscribe(update$);
-
-  // Add a new override to some entity
-  function addOverride(id: string, update: Override<S, T>) {
-    overrides.set(id, { update, nonce: nonce++ });
-    setOverriddenComponentValue(update.entity, update.value);
-  }
-
-  // Remove an override from an entity
-  function removeOverride(id: string) {
-    const affectedEntity = overrides.get(id)?.update.entity;
-    overrides.delete(id);
-
-    if (affectedEntity == null) return;
-
-    // If there are more overries affecting this entity,
-    // set the overriddenEntityValue to the last override
-    const relevantOverrides = [...overrides.values()]
-      .filter((o) => o.update.entity === affectedEntity)
-      .sort((a, b) => (a.nonce < b.nonce ? -1 : 1));
-
-    if (relevantOverrides.length > 0) {
-      const lastOverride = relevantOverrides[relevantOverrides.length - 1];
-      setOverriddenComponentValue(affectedEntity, lastOverride.update.value);
-    } else {
-      setOverriddenComponentValue(affectedEntity, undefined);
-    }
-  }
-
-  // Internal function to get the current overridden value or value of the source component
-  function getOverriddenComponentValue(entity: EntityIndex): ComponentValue<S, T> | undefined {
-    const originalValue = getComponentValue(component, entity);
-    const overriddenValue = overriddenEntityValues.get(entity);
-    return (originalValue || overriddenValue) && overriddenValue !== null // null is a valid override, in this case return undefined
-      ? ({ ...originalValue, ...overriddenValue } as ComponentValue<S, T>)
-      : undefined;
-  }
-
-  const valueProxyHandler: (key: keyof S) => ProxyHandler<typeof component.values[typeof key]> = (key: keyof S) => ({
-    get(target, prop) {
-      // Intercept calls to component.value[key].get(entity)
-      if (prop === "get") {
-        return (entity: EntityIndex) => {
-          const originalValue = target.get(entity);
-          const overriddenValue = overriddenEntityValues.get(entity);
-          return overriddenValue && overriddenValue[key] != null ? overriddenValue[key] : originalValue;
-        };
-      }
-
-      // Intercept calls to component.value[key].has(entity)
-      if (prop === "has") {
-        return (entity: EntityIndex) => {
-          return target.has(entity) || overriddenEntityValues.has(entity);
-        };
-      }
-
-      // Intercept calls to component.value[key].keys()
-      if (prop === "keys") {
-        return () => new Set([...target.keys(), ...overriddenEntityValues.keys()]).values();
-      }
-      return Reflect.get(target, prop).bind(target);
-    },
-  });
-
-  const partialValues: Partial<Component<S, M, T>["values"]> = {};
-  for (const key of Object.keys(component.values) as (keyof S)[]) {
-    partialValues[key] = new Proxy(component.values[key], valueProxyHandler(key));
-  }
-  const valuesProxy = partialValues as Component<S, M, T>["values"];
-
-  const overriddenComponent = new Proxy(component, {
-    get(target, prop) {
-      if (prop === "addOverride") return addOverride;
-      if (prop === "removeOverride") return removeOverride;
-      if (prop === "values") return valuesProxy;
-      if (prop === "update$") return update$;
-      if (prop === "entities") return () => new Set([...overriddenEntityValues.keys(), ...target.entities()]).values();
-
-      return Reflect.get(target, prop);
-    },
-    has(target, prop) {
-      if (prop === "addOverride" || prop === "removeOverride") return true;
-      return prop in target;
-    },
-  }) as OverridableComponent<S, M, T>;
-
-  // Internal function to set the current overridden component value and emit the update event
-  function setOverriddenComponentValue(entity: EntityIndex, value?: Partial<ComponentValue<S, T>> | null) {
-    // Check specifically for undefined - null is a valid override
-    const prevValue = getOverriddenComponentValue(entity);
-    if (value !== undefined) overriddenEntityValues.set(entity, value);
-    else overriddenEntityValues.delete(entity);
-    update$.next({ entity, value: [getOverriddenComponentValue(entity), prevValue], component: overriddenComponent });
-  }
-
-  return overriddenComponent;
 }
 
 function getLocalCacheId(component: Component, uniqueWorldIdentifier?: string): string {
