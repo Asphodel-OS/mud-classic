@@ -9,7 +9,7 @@ import {
   withValue,
   setComponent,
   removeComponent,
-} from "@latticexyz/recs";
+} from "@mud-classic/recs";
 import { useComponentValue } from "./useComponentValue";
 
 describe("useComponentValue", () => {

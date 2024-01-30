@@ -11,7 +11,7 @@ import {
   setComponent,
   HasValue,
   removeComponent,
-} from "@latticexyz/recs";
+} from "@mud-classic/recs";
 import { useEntityQuery } from "./useEntityQuery";
 
 describe("useEntityQuery", () => {
