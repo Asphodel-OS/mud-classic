@@ -18,7 +18,7 @@
     "dev": "tsup src/index.ts --format cjs,esm --dts-resolve --watch --sourcemap --legacy-output",
     "lint": "eslint . --ext .ts",
     "nuke": "rimraf node_modules/ dist/",
-    "test": "pnpm run build && jest"
+    "test": "pnpm run build && jest --coverage"
   },
   "dependencies": {
     "@mud-classic/utils": "^0.0.1",
