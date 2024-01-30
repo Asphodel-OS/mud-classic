@@ -1,7 +1,7 @@
 import { VirtualTilemap } from "./types";
 import { WorldCoord } from "../types";
 import { tileCoordToChunkCoord } from "../utils";
-import { CoordMap } from "@latticexyz/utils";
+import { CoordMap } from "@mud-classic/utils";
 import { ChunkedTilemapConfig, createChunkedTilemap } from "./createChunkedTilemap";
 
 export function createVirtualTilemap<TileKeys extends number, LayerKeys extends string>(

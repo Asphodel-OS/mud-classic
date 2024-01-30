@@ -10,7 +10,7 @@ import { createObjectPool } from "./createObjectPool";
 import { createAnimatedTilemap } from "./tilemap";
 import { generateFrames } from "./utils";
 import { createInput } from "./createInput";
-import { deferred } from "@latticexyz/utils";
+import { deferred } from "@mud-classic/utils";
 
 export async function createPhaserEngine<S extends ScenesConfig>(options: PhaserEngineConfig<S>) {
   const { scale, sceneConfig, cameraConfig, cullingChunkSize } = options;

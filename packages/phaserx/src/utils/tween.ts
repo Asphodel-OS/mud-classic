@@ -1,4 +1,4 @@
-import { deferred } from "@latticexyz/utils";
+import { deferred } from "@mud-classic/utils";
 
 type TweenBuilderConfig = { targets: Phaser.GameObjects.Sprite } & Omit<
   Phaser.Types.Tweens.TweenBuilderConfig,

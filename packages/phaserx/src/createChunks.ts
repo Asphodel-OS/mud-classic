@@ -1,7 +1,7 @@
 import { map, Observable, Subject } from "rxjs";
 import { Area, ChunkCoord } from "./types";
 import { getChunksInArea } from "./utils";
-import { CoordMap, subtract } from "@latticexyz/utils";
+import { CoordMap, subtract } from "@mud-classic/utils";
 
 export function createChunks(worldView$: Observable<Area>, chunkSize: number, padding = 100) {
   const visibleChunks = { current: new CoordMap<boolean>() };

@@ -1,4 +1,4 @@
-import { CoordMap } from "@latticexyz/utils";
+import { CoordMap } from "@mud-classic/utils";
 import { WorldCoord } from "../types";
 
 export interface ChunkedTilemap<TileKeys extends number, LayerKeys extends string> {
