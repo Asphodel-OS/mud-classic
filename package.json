@@ -1,74 +1,32 @@
 {
-  "name": "mud",
-  "version": "0.0.0",
-  "description": "Mud is the fabric of autonomous worlds",
+  "private": true,
+  "name": "mud-classic",
+  "license": "MIT",
+  "version": "0.0.1",
+  "description": "Consolidated and practical EVM-oriented data management",
   "repository": {
     "type": "git",
-    "url": "https://github.com/latticexyz/mud.git"
-  },
-  "private": true,
-  "workspaces": {
-    "packages": [
-      "packages/utils",
-      "packages/solecs",
-      "packages/cli",
-      "packages/recs",
-      "packages/react",
-      "packages/phaserx",
-      "packages/network",
-      "packages/std-contracts",
-      "packages/std-client",
-      "packages/ecs-browser",
-      "packages/services",
-      "packages/noise",
-      "packages/create-mud"
-    ]
+    "url": "https://github.com/Asphodel-OS/mud-classic.git"
   },
   "devDependencies": {
-    "@commitlint/cli": "^16.2.4",
-    "@commitlint/config-conventional": "^16.2.4",
-    "@parcel/optimizer-data-url": "2.7.0",
-    "@parcel/packager-ts": "2.7.0",
-    "@parcel/transformer-inline-string": "2.7.0",
-    "@parcel/transformer-typescript-types": "2.7.0",
+    "@changesets/cli": "^2.27.1",
     "@typescript-eslint/eslint-plugin": "^5.23.0",
     "@typescript-eslint/parser": "^5.23.0",
-    "commitizen": "^4.2.4",
-    "cz-conventional-changelog": "3.3.0",
     "eslint": "^8.15.0",
-    "husky": ">=6",
     "jq-cli-wrapper": "^1.6.1",
-    "lerna": "^4.0.0",
     "lint-staged": ">=10",
     "prettier": "^2.6.2",
     "retypeapp": "^2.4.0",
     "rimraf": "^3.0.2",
     "run-pty": "^3.0.0",
+    "tsup": "^8.0.1",
     "typescript": ">=3.0.0"
   },
-  "config": {
-    "commitizen": {
-      "path": "./node_modules/cz-conventional-changelog"
-    }
-  },
   "scripts": {
-    "prepare": "husky install && (forge --version || yarn foundryup) && yarn workspaces run prepare",
-    "commit": "cz",
     "prettier:check": "prettier --check 'packages/**/*.ts'",
     "prettier": "prettier --write 'packages/**/*.ts'",
     "lint": "eslint . --ext .ts",
-    "release": "yarn && lerna publish --no-private --force-publish && yarn retype:updateversion",
-    "release:force": "yarn lerna run release",
-    "foundryup": "curl -L https://foundry.paradigm.xyz | bash && bash ~/.foundry/bin/foundryup",
-    "link:packages": "yarn lerna run link",
-    "docs": "yarn lerna run docs && yarn retype:updateversion && yarn retype build",
-    "docs:dev": "yarn retype watch .",
-    "retype:updateversion": "sed \"s/label: .*/label: $(yarn list --pattern @latticexyz/solecs | grep -e @latticexyz | sed \"s/.*@//\")/\" retype.yml > retype.yml.tmp && mv retype.yml.tmp retype.yml",
-    "test": "yarn workspaces run test",
-    "yalc:release": "yarn entry:dist && yarn lerna exec yalc push",
-    "yalc:reset": "yarn entry:src",
-    "entry:dist": "yarn lerna run prepack",
-    "entry:src": "yarn lerna run postpack"
+    "test": "pnpm -F utils run test"
   },
   "lint-staged": {
     "*.ts": "eslint --cache --fix",

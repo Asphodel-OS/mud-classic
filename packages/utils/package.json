@@ -16,10 +16,10 @@
   "scripts": {
     "build": "tsup src/index.ts --format cjs,esm --dts-resolve --minify --clean --sourcemap --legacy-output",
     "dev": "tsup src/index.ts --format cjs,esm --dts-resolve --watch --sourcemap --legacy-output",
-    "release": "pnpm run build && changeset publish",
     "lint": "eslint . --ext .ts",
-    "test": "tsc && jest",
-    "nuke": "rm pnpm-lock.yaml && rm -rf node_modules/ && rm -rf dist/"
+    "nuke": "rm pnpm-lock.yaml && rm -rf node_modules/ && rm -rf dist/",
+    "release": "pnpm run build && changeset publish",
+    "test": "tsc && jest"
   },
   "dependencies": {
     "mobx": "^6.5.0",
