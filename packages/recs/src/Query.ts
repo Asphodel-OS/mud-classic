@@ -1,4 +1,4 @@
-import { filterNullish } from "@latticexyz/utils";
+import { filterNullish } from "@mud-classic/utils";
 import { observable, ObservableSet } from "mobx";
 import { concat, concatMap, filter, from, map, merge, Observable, Observer, of, Subject } from "rxjs";
 import {
@@ -435,75 +435,75 @@ export function defineQuery(
     .pipe(
       containsProxy // Query contains proxies
         ? concatMap((update) => {
-            // If the query contains proxy read or expand fragments, entities up or down the proxy chain might match due to this update.
-            // We have to run the entire query again and compare the result.
-            // TODO: We might be able to make this more efficient by first computing the set of entities that are potentially touched by this update
-            // and then only rerun the query on this set.
-            const newMatchingSet = runQuery(fragments, options?.initialSet);
-            const updates: (ComponentUpdate & { type: UpdateType })[] = [];
+          // If the query contains proxy read or expand fragments, entities up or down the proxy chain might match due to this update.
+          // We have to run the entire query again and compare the result.
+          // TODO: We might be able to make this more efficient by first computing the set of entities that are potentially touched by this update
+          // and then only rerun the query on this set.
+          const newMatchingSet = runQuery(fragments, options?.initialSet);
+          const updates: (ComponentUpdate & { type: UpdateType })[] = [];
 
-            for (const previouslyMatchingEntity of matching) {
-              // Entity matched before but doesn't match now
-              if (!newMatchingSet.has(previouslyMatchingEntity)) {
-                matching.delete(previouslyMatchingEntity);
-                updates.push({
-                  entity: previouslyMatchingEntity,
-                  type: UpdateType.Exit,
-                  component: update.component,
-                  value: [undefined, undefined],
-                });
-              }
+          for (const previouslyMatchingEntity of matching) {
+            // Entity matched before but doesn't match now
+            if (!newMatchingSet.has(previouslyMatchingEntity)) {
+              matching.delete(previouslyMatchingEntity);
+              updates.push({
+                entity: previouslyMatchingEntity,
+                type: UpdateType.Exit,
+                component: update.component,
+                value: [undefined, undefined],
+              });
             }
+          }
 
-            for (const matchingEntity of newMatchingSet) {
-              if (matching.has(matchingEntity)) {
-                // Entity matched before and still matches
-                updates.push({
-                  entity: matchingEntity,
-                  type: UpdateType.Update,
-                  component: update.component,
-                  value: [getComponentValue(update.component, matchingEntity), undefined],
-                });
-              } else {
-                // Entity didn't match before but matches now
-                matching.add(matchingEntity);
-                updates.push({
-                  entity: matchingEntity,
-                  type: UpdateType.Enter,
-                  component: update.component,
-                  value: [getComponentValue(update.component, matchingEntity), undefined],
-                });
-              }
+          for (const matchingEntity of newMatchingSet) {
+            if (matching.has(matchingEntity)) {
+              // Entity matched before and still matches
+              updates.push({
+                entity: matchingEntity,
+                type: UpdateType.Update,
+                component: update.component,
+                value: [getComponentValue(update.component, matchingEntity), undefined],
+              });
+            } else {
+              // Entity didn't match before but matches now
+              matching.add(matchingEntity);
+              updates.push({
+                entity: matchingEntity,
+                type: UpdateType.Enter,
+                component: update.component,
+                value: [getComponentValue(update.component, matchingEntity), undefined],
+              });
             }
+          }
 
-            return of(...updates);
-          })
+          return of(...updates);
+        })
         : // Query does not contain proxies
-          map((update) => {
-            if (matching.has(update.entity)) {
-              // If this entity matched the query before, check if it still matches it
-              // Find fragments accessign this component (linear search is fine since the number fragments is likely small)
-              const relevantFragments = fragments.filter((f) => f.component.id === update.component.id);
-              const pass = relevantFragments.every((f) => passesQueryFragment(update.entity, f as EntityQueryFragment)); // We early return if the query contains proxies
+        map((update) => {
+          if (matching.has(update.entity)) {
+            // If this entity matched the query before, check if it still matches it
+            // Find fragments accessign this component (linear search is fine since the number fragments is likely small)
+            const relevantFragments = fragments.filter((f) => f.component.id === update.component.id);
+            const pass = relevantFragments.every((f) => passesQueryFragment(update.entity, f as EntityQueryFragment)); // We early return if the query contains proxies
 
-              if (pass) {
-                // Entity passed before and still passes, forward update
-                return { ...update, type: UpdateType.Update };
-              } else {
-                // Entity passed before but not anymore, forward update and exit
-                matching.delete(update.entity);
-                return { ...update, type: UpdateType.Exit };
-              }
-            }
-
-            // This entity didn't match before, check all fragments
-            const pass = fragments.every((f) => passesQueryFragment(update.entity, f as EntityQueryFragment)); // We early return if the query contains proxies
             if (pass) {
-              // Entity didn't pass before but passes now, forward update end enter
-              matching.add(update.entity);
-              return { ...update, type: UpdateType.Enter };
+              // Entity passed before and still passes, forward update
+              return { ...update, type: UpdateType.Update };
+            } else {
+              // Entity passed before but not anymore, forward update and exit
+              matching.delete(update.entity);
+              return { ...update, type: UpdateType.Exit };
             }
-          }),
+          }
+
+          // This entity didn't match before, check all fragments
+          const pass = fragments.every((f) => passesQueryFragment(update.entity, f as EntityQueryFragment)); // We early return if the query contains proxies
+          if (pass) {
+            // Entity didn't pass before but passes now, forward update end enter
+            matching.add(update.entity);
+            return { ...update, type: UpdateType.Enter };
+          }
+        }),
       filterNullish()
     );
 

@@ -1,4 +1,4 @@
-import { arrayToIterator } from "@latticexyz/utils";
+import { arrayToIterator } from "@mud-classic/utils";
 import { Subject } from "rxjs";
 import { defineComponent, setComponent } from "../src/Component";
 import { Type } from "../src/constants";

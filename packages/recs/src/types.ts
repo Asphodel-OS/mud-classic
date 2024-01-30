@@ -26,8 +26,8 @@ export type Schema = {
  */
 export type Metadata =
   | {
-      [key: string]: unknown;
-    }
+    [key: string]: unknown;
+  }
   | undefined;
 
 /**
@@ -177,23 +177,6 @@ export type SettingQueryFragment = ProxyReadQueryFragment | ProxyExpandQueryFrag
 export type QueryFragments = QueryFragment<Schema>[];
 
 export type SchemaOf<C extends Component<Schema>> = C extends Component<infer S> ? S : never;
-
-export type Override<S extends Schema, T = undefined> = {
-  entity: EntityIndex;
-  value: Partial<ComponentValue<S, T>> | null;
-};
-
-/**
- * Type of overridable component returned by {@link overridableComponent}.
- */
-export type OverridableComponent<S extends Schema = Schema, M extends Metadata = Metadata, T = undefined> = Component<
-  S,
-  M,
-  T
-> & {
-  addOverride: (overrideId: string, update: Override<S, T>) => void;
-  removeOverride: (overrideId: string) => void;
-};
 
 export type OptionalType =
   | Type.OptionalNumber
