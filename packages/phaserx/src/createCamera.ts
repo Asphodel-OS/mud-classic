@@ -38,37 +38,37 @@ export function createCamera(phaserCamera: Phaser.Cameras.Scene2D.Camera, option
     zoom$.next(zoom);
   }
 
-  const pinchSub = pinchStream$
-    .pipe(
-      throttleTime(10),
-      map((state) => {
-        // Because this event stream is throttled, we're dropping events which contain delta data, so we need to calculate the delta ourselves.
-        const zoom = zoom$.getValue();
-        const delta = state.offset[0] - zoom;
-        const scaledDelta = delta * options.pinchSpeed;
-        return zoom + scaledDelta;
-      }), // Compute pinch speed
-      map((zoom) => Math.min(Math.max(zoom, options.minZoom), options.maxZoom)), // Limit zoom values
-      scan((acc, curr) => [acc[1], curr], [1, 1]) // keep track of the last value to offset the map position (not implemented yet)
-    )
-    .subscribe(([, zoom]) => {
-      // Set the gesture zoom state to the current zoom value to avoid zooming beyond the max values
-      if (gesture._ctrl.state.pinch) gesture._ctrl.state.pinch.offset[0] = zoom;
-      setZoom(zoom);
-    });
+  // const pinchSub = pinchStream$
+  //   .pipe(
+  //     throttleTime(10),
+  //     map((state) => {
+  //       // Because this event stream is throttled, we're dropping events which contain delta data, so we need to calculate the delta ourselves.
+  //       const zoom = zoom$.getValue();
+  //       const delta = state.offset[0] - zoom;
+  //       const scaledDelta = delta * options.pinchSpeed;
+  //       return zoom + scaledDelta;
+  //     }), // Compute pinch speed
+  //     map((zoom) => Math.min(Math.max(zoom, options.minZoom), options.maxZoom)), // Limit zoom values
+  //     scan((acc, curr) => [acc[1], curr], [1, 1]) // keep track of the last value to offset the map position (not implemented yet)
+  //   )
+  //   .subscribe(([, zoom]) => {
+  //     // Set the gesture zoom state to the current zoom value to avoid zooming beyond the max values
+  //     if (gesture._ctrl.state.pinch) gesture._ctrl.state.pinch.offset[0] = zoom;
+  //     setZoom(zoom);
+  //   });
 
-  const wheelSub = wheelStream$
-    .pipe(
-      filter((state) => !state.pinching),
-      sampleTime(10),
-      map((state) => state.delta.map((x) => x * options.wheelSpeed)), // Compute wheel speed
-      map((movement) => movement.map((m) => m / phaserCamera.zoom)), // Adjust for current zoom value
-      map((movement) => [phaserCamera.scrollX + movement[0], phaserCamera.scrollY + movement[1]]) // Compute new pinch
-    )
-    .subscribe(([x, y]) => {
-      phaserCamera.setScroll(x, y);
-      worldView$.next(phaserCamera.worldView);
-    });
+  // const wheelSub = wheelStream$
+  //   .pipe(
+  //     filter((state) => !state.pinching),
+  //     sampleTime(10),
+  //     map((state) => state.delta.map((x: number) => x * options.wheelSpeed)), // Compute wheel speed
+  //     map((movement) => movement.map((m: number) => m / phaserCamera.zoom)), // Adjust for current zoom value
+  //     map((movement) => [phaserCamera.scrollX + movement[0], phaserCamera.scrollY + movement[1]]) // Compute new pinch
+  //   )
+  //   .subscribe(([x, y]) => {
+  //     phaserCamera.setScroll(x, y);
+  //     worldView$.next(phaserCamera.worldView);
+  //   });
 
   function ignore(objectPool: ObjectPool, ignore: boolean) {
     objectPool.ignoreCamera(phaserCamera.id, ignore);
@@ -95,8 +95,8 @@ export function createCamera(phaserCamera: Phaser.Cameras.Scene2D.Camera, option
     zoom$,
     ignore,
     dispose: () => {
-      pinchSub.unsubscribe();
-      wheelSub.unsubscribe();
+      // pinchSub.unsubscribe();
+      // wheelSub.unsubscribe();
       gesture.destroy();
       phaserCamera.scene.scale.removeListener("resize", onResize);
     },

@@ -1,5 +1,5 @@
 import { chunkToPixelCoord } from "./utils";
-import { CoordMap } from "@latticexyz/utils";
+import { CoordMap } from "@mud-classic/utils";
 import { Camera, Chunks, ObjectPool } from "./types";
 import { AnimatedTilemap } from "./tilemap";
 

@@ -1,4 +1,4 @@
-import { deferred } from "@latticexyz/utils";
+import { deferred } from "@mud-classic/utils";
 
 export async function load(scene: Phaser.Scene, callback: (loader: Phaser.Loader.LoaderPlugin) => void) {
   const loader = scene.load;
