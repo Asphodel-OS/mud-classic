@@ -9,8 +9,9 @@ export function formatHex(hex: string): string {
 export function hexStringToUint8Array(hexString: string): Uint8Array {
   let matches = hexString.match(/.{1,2}/g);
   if (!matches || hexString.length % 2 !== 0) throw new Error("invalid hex string: " + hexString);
-  if (matches[0] == "0x") matches = matches.slice(1);
-  return Uint8Array.from(matches.map((byte) => parseInt(byte, 16)));
+  let addressBytes = [] as string[];
+  if (matches[0] == "0x") addressBytes = matches.slice(1);
+  return Uint8Array.from(addressBytes.map((byte) => parseInt(byte, 16)));
 }
 
 export function Uint8ArrayToHexString(data: Uint8Array): string {
