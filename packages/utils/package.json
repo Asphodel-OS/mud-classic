@@ -17,9 +17,9 @@
     "build": "tsup src/index.ts --format cjs,esm --dts-resolve --minify --clean --sourcemap --legacy-output",
     "dev": "tsup src/index.ts --format cjs,esm --dts-resolve --watch --sourcemap --legacy-output",
     "lint": "eslint . --ext .ts",
-    "nuke": "rm pnpm-lock.yaml && rm -rf node_modules/ && rm -rf dist/",
+    "nuke": "rimraf node_modules/ dist/",
     "release": "pnpm run build && changeset publish",
-    "test": "tsc && jest"
+    "test": "pnpm run build && jest"
   },
   "dependencies": {
     "mobx": "^6.5.0",
