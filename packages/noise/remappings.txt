@@ -1,2 +1,0 @@
-ds-test/=../../node_modules/ds-test/src/
-forge-std/=../../node_modules/forge-std/src/
