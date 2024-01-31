@@ -21,22 +21,22 @@ contract ComponentTest is DSTestPlus {
   address payable[] internal users;
 
   BoolComponent internal boolComponent;
-  uint256 constant BoolID = uint256(keccak256("component.Bool"));
+  uint256 internal constant BoolID = uint256(keccak256("component.Bool"));
 
   BoolBareComponent internal boolBareComponent;
-  uint256 constant BoolBareID = uint256(keccak256("component.BoolBare"));
+  uint256 internal constant BoolBareID = uint256(keccak256("component.BoolBare"));
 
   Uint256Component internal uint256Component;
-  uint256 constant Uint256ID = uint256(keccak256("component.Uint256"));
+  uint256 internal constant Uint256ID = uint256(keccak256("component.Uint256"));
 
   Uint256BareComponent internal uint256BareComponent;
-  uint256 constant Uint256BareID = uint256(keccak256("component.Uint256Bare"));
+  uint256 internal constant Uint256BareID = uint256(keccak256("component.Uint256Bare"));
 
   CoordComponent internal coordComponent;
-  uint256 constant CoordID = uint256(keccak256("component.Coord"));
+  uint256 internal constant CoordID = uint256(keccak256("component.Coord"));
 
   CoordBareComponent internal coordBareComponent;
-  uint256 constant CoordBareID = uint256(keccak256("component.CoordBare"));
+  uint256 internal constant CoordBareID = uint256(keccak256("component.CoordBare"));
 
   TestComponent internal testComponent;
   TestBareComponent internal testBareComponent;

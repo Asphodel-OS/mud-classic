@@ -17,13 +17,13 @@ contract SystemCallbackComponentTest is DSTest {
   World internal world;
 
   Uint256BareComponent internal uint256BareComponent;
-  uint256 Uint256BareID = uint256(keccak256("component.Uint256Bare"));
+  uint256 internal uint256BareID = uint256(keccak256("component.Uint256Bare"));
 
   SystemCallbackBareComponent internal systemCallbackBareComponent;
   SystemCallbackComponent internal systemCallbackComponent;
 
   TestSystem internal system;
-  uint256 TestSystemID = uint256(keccak256("system.TestSystem"));
+  uint256 internal testSystemID = uint256(keccak256("system.TestSystem"));
 
   uint256 internal entity = uint256(keccak256("test entity"));
   uint256[] internal entities;
@@ -34,7 +34,7 @@ contract SystemCallbackComponentTest is DSTest {
     world.init();
     address worldAddress = address(world);
 
-    uint256BareComponent = new Uint256BareComponent(worldAddress, Uint256BareID);
+    uint256BareComponent = new Uint256BareComponent(worldAddress, uint256BareID);
     systemCallbackBareComponent = new SystemCallbackBareComponent(
       worldAddress,
       uint256(keccak256("component.SystemCallbackBare"))
@@ -42,7 +42,7 @@ contract SystemCallbackComponentTest is DSTest {
     systemCallbackComponent = new SystemCallbackComponent(worldAddress, uint256(keccak256("component.SystemCallback")));
 
     system = new TestSystem(world, address(world.components()));
-    world.registerSystem(address(system), TestSystemID);
+    world.registerSystem(address(system), testSystemID);
     uint256BareComponent.authorizeWriter(address(system));
 
     // initialize sample values for TestSystem,
@@ -57,8 +57,8 @@ contract SystemCallbackComponentTest is DSTest {
 
   function testGetAndExecuteSystemCallbackBare() public {
     SystemCallback memory cb = SystemCallback({
-      systemId: TestSystemID,
-      args: abi.encode(Uint256BareID, entities, values)
+      systemId: testSystemID,
+      args: abi.encode(uint256BareID, entities, values)
     });
     systemCallbackBareComponent.set(entity, cb);
 
@@ -71,8 +71,8 @@ contract SystemCallbackComponentTest is DSTest {
 
   function testGetAndExecuteSystemCallback() public {
     SystemCallback memory cb = SystemCallback({
-      systemId: TestSystemID,
-      args: abi.encode(Uint256BareID, entities, values)
+      systemId: testSystemID,
+      args: abi.encode(uint256BareID, entities, values)
     });
     systemCallbackComponent.set(entity, cb);
 
@@ -87,7 +87,7 @@ contract SystemCallbackComponentTest is DSTest {
     // minimize the args so they don't affect gas too much
     entities = new uint256[](1);
     values = new bytes[](1);
-    return SystemCallback({ systemId: TestSystemID, args: abi.encode(Uint256BareID, entities, values) });
+    return SystemCallback({ systemId: testSystemID, args: abi.encode(uint256BareID, entities, values) });
   }
 
   function testSystemCallbackGas() public {

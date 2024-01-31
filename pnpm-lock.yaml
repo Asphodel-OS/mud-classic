@@ -185,7 +185,7 @@ importers:
         version: 1.43.0(@latticexyz/utils@1.43.0)(mobx@6.12.0)(rxjs@7.8.1)(type-fest@2.19.0)
       '@latticexyz/solecs':
         specifier: ^1.35.0
-        version: 1.43.0(@rari-capital/solmate@6.2.0)(@solidstate/contracts@0.0.52)(ds-test@1.0.0)(forge-std@1.2.0)
+        version: 1.43.0(@solidstate/contracts@0.0.52)(ds-test@1.0.0)(forge-std@0.1.0)
       '@latticexyz/utils':
         specifier: ^1.35.0
         version: 1.43.0(ethers@5.7.2)(mobx@6.12.0)(proxy-deep@3.1.1)(rxjs@7.8.1)(typedoc@0.23.21)(web3-utils@1.10.3)
@@ -450,7 +450,7 @@ importers:
         version: 1.43.0(@latticexyz/utils@1.43.0)(mobx@6.12.0)(rxjs@7.8.1)(type-fest@2.19.0)
       '@latticexyz/solecs':
         specifier: ^1.35.0
-        version: 1.43.0(@rari-capital/solmate@6.2.0)(@solidstate/contracts@0.0.52)(ds-test@1.0.0)(forge-std@1.2.0)
+        version: 1.43.0(@solidstate/contracts@0.0.52)(ds-test@1.0.0)(forge-std@0.1.0)
       '@latticexyz/utils':
         specifier: ^1.35.0
         version: 1.43.0(ethers@5.7.2)(mobx@6.12.0)(proxy-deep@3.1.1)(rxjs@7.8.1)(typedoc@0.23.21)(web3-utils@1.10.3)
@@ -526,12 +526,18 @@ importers:
 
   packages/std-contracts:
     devDependencies:
-      '@latticexyz/solecs':
-        specifier: ^1.35.0
-        version: 1.43.0(@rari-capital/solmate@6.2.0)(@solidstate/contracts@0.0.52)(ds-test@1.0.0)(forge-std@1.2.0)
+      '@mud-classic/solecs':
+        specifier: ^0.0.1
+        version: link:../solecs
+      '@solidstate/contracts':
+        specifier: ^0.0.52
+        version: 0.0.52
       '@typechain/ethers-v5':
         specifier: ^9.0.0
         version: 9.0.0(@ethersproject/abi@5.7.0)(@ethersproject/bytes@5.7.0)(@ethersproject/providers@5.7.2)(ethers@5.7.2)(typechain@8.3.2)(typescript@4.9.5)
+      '@types/mocha':
+        specifier: ^9.1.1
+        version: 9.1.1
       ds-test:
         specifier: https://github.com/dapphub/ds-test.git#c9ce3f25bde29fc5eb9901842bf02850dfd2d084
         version: github.com/dapphub/ds-test/c9ce3f25bde29fc5eb9901842bf02850dfd2d084
@@ -541,6 +547,9 @@ importers:
       hardhat:
         specifier: ^2.10.1
         version: 2.19.5(ts-node@10.7.0)(typescript@4.9.5)
+      memmove:
+        specifier: https://github.com/dk1a/memmove.git#ffd71cd77b1708574ef46a667b23ca3a5cc9fa27
+        version: github.com/dk1a/memmove/ffd71cd77b1708574ef46a667b23ca3a5cc9fa27
       prettier:
         specifier: ^2.6.2
         version: 2.8.8
@@ -553,18 +562,12 @@ importers:
       solhint:
         specifier: ^3.3.7
         version: 3.6.2(typescript@4.9.5)
-      solidity-docgen:
-        specifier: ^0.6.0-beta.22
-        version: 0.6.0-beta.36(hardhat@2.19.5)
       solmate:
         specifier: https://github.com/transmissions11/solmate.git#b6ae78e6ff490f8fec7695c7b65d06e5614f1b65
         version: github.com/transmissions11/solmate/b6ae78e6ff490f8fec7695c7b65d06e5614f1b65
       typechain:
         specifier: ^8.1.1
         version: 8.3.2(typescript@4.9.5)
-      typedoc:
-        specifier: ^0.23.10
-        version: 0.23.21(typescript@4.9.5)
 
   packages/utils:
     dependencies:
@@ -2282,7 +2285,7 @@ packages:
       '@improbable-eng/grpc-web': 0.15.0(google-protobuf@3.21.2)
       '@latticexyz/recs': 1.43.0(@latticexyz/utils@1.43.0)(mobx@6.12.0)(rxjs@7.8.1)(type-fest@2.19.0)
       '@latticexyz/services': 1.43.0
-      '@latticexyz/solecs': 1.43.0(@rari-capital/solmate@6.2.0)(@solidstate/contracts@0.0.52)(ds-test@1.0.0)(forge-std@1.2.0)
+      '@latticexyz/solecs': 1.43.0(@solidstate/contracts@0.0.52)(ds-test@1.0.0)(forge-std@0.1.0)
       '@latticexyz/utils': 1.43.0(ethers@5.7.2)(mobx@6.12.0)(proxy-deep@3.1.1)(rxjs@7.8.1)(typedoc@0.23.21)(web3-utils@1.10.3)
       '@protobuf-ts/grpcweb-transport': 2.9.3
       async-mutex: 0.3.2
@@ -2317,21 +2320,6 @@ packages:
       nice-grpc-common: 2.0.2
       protobufjs: 7.2.6
 
-  /@latticexyz/solecs@1.43.0(@rari-capital/solmate@6.2.0)(@solidstate/contracts@0.0.52)(ds-test@1.0.0)(forge-std@1.2.0):
-    resolution: {integrity: sha512-6ZMMeKa13exwEInnRbHP9R7gRxxxo3HfAO+xdlPtvqQqnc9HUx2crG/6Tpo+i/LmhPEafC3m6QVrPz+py+AaOQ==}
-    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
-    peerDependencies:
-      '@rari-capital/solmate': https://github.com/Rari-Capital/solmate.git#b6ae78e6ff490f8fec7695c7b65d06e5614f1b65
-      '@solidstate/contracts': ^0.0.52
-      ds-test: https://github.com/dapphub/ds-test.git#c9ce3f25bde29fc5eb9901842bf02850dfd2d084
-      forge-std: https://github.com/foundry-rs/forge-std.git#b4f121555729b3afb3c5ffccb62ff4b6e2818fd3
-      memmove: https://github.com/dk1a/memmove.git#ffd71cd77b1708574ef46a667b23ca3a5cc9fa27
-    dependencies:
-      '@rari-capital/solmate': github.com/transmissions11/solmate/b6ae78e6ff490f8fec7695c7b65d06e5614f1b65
-      '@solidstate/contracts': 0.0.52
-      ds-test: github.com/dapphub/ds-test/c9ce3f25bde29fc5eb9901842bf02850dfd2d084
-      forge-std: github.com/foundry-rs/forge-std/b4f121555729b3afb3c5ffccb62ff4b6e2818fd3
-
   /@latticexyz/solecs@1.43.0(@solidstate/contracts@0.0.52)(ds-test@1.0.0)(forge-std@0.1.0):
     resolution: {integrity: sha512-6ZMMeKa13exwEInnRbHP9R7gRxxxo3HfAO+xdlPtvqQqnc9HUx2crG/6Tpo+i/LmhPEafC3m6QVrPz+py+AaOQ==}
     deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
@@ -2345,7 +2333,6 @@ packages:
       '@solidstate/contracts': 0.0.52
       ds-test: github.com/dapphub/ds-test/c9ce3f25bde29fc5eb9901842bf02850dfd2d084
       forge-std: github.com/foundry-rs/forge-std/f36dab24d63d1c1945a05ed375ce341d3c1a49ed
-    dev: false
 
   /@latticexyz/std-contracts@1.43.0:
     resolution: {integrity: sha512-o0boia6JYDsy+DEajAR9PZ/V0szU7ryyydlbGfqSJzy+u4skTB+CIttHTnJ9DY0bYbzlluVlyhprXHj1K9F3+A==}
@@ -14434,12 +14421,12 @@ packages:
     resolution: {tarball: https://codeload.github.com/foundry-rs/forge-std/tar.gz/b4f121555729b3afb3c5ffccb62ff4b6e2818fd3}
     name: forge-std
     version: 1.2.0
+    dev: true
 
   github.com/foundry-rs/forge-std/f36dab24d63d1c1945a05ed375ce341d3c1a49ed:
     resolution: {tarball: https://codeload.github.com/foundry-rs/forge-std/tar.gz/f36dab24d63d1c1945a05ed375ce341d3c1a49ed}
     name: forge-std
     version: 0.1.0
-    dev: false
 
   github.com/transmissions11/solmate/9cf1428245074e39090dceacb0c28b1f684f584c:
     resolution: {tarball: https://codeload.github.com/transmissions11/solmate/tar.gz/9cf1428245074e39090dceacb0c28b1f684f584c}
@@ -14451,3 +14438,4 @@ packages:
     resolution: {tarball: https://codeload.github.com/transmissions11/solmate/tar.gz/b6ae78e6ff490f8fec7695c7b65d06e5614f1b65}
     name: '@rari-capital/solmate'
     version: 6.2.0
+    dev: true
