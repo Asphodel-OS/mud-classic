@@ -9,7 +9,7 @@ import { AddressBareComponent } from "../components/AddressBareComponent.sol";
 uint256 constant ID = uint256(keccak256("system.Upgradable"));
 
 contract UpgradableSystem is PayableSystem {
-  address implementation;
+  address internal implementation;
 
   constructor(IWorld _world, address _components) PayableSystem(_world, _components) {}
 

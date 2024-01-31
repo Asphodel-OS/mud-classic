@@ -7,7 +7,6 @@ import { IUint256Component } from "solecs/interfaces/IUint256Component.sol";
 import { Vm } from "forge-std/Vm.sol";
 import { getAddressById } from "solecs/utils.sol";
 import { SystemStorage } from "solecs/SystemStorage.sol";
-import { console } from "forge-std/console.sol";
 import { Utilities } from "./Utilities.sol";
 
 interface IDeploy {
@@ -24,8 +23,8 @@ contract MudTest is DSTest {
   address internal deployer;
 
   IWorld internal world;
-  IUint256Component components;
-  IUint256Component systems;
+  IUint256Component internal components;
+  IUint256Component internal systems;
 
   IDeploy internal deploy;
 
