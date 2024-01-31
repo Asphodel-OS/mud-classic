@@ -12,8 +12,8 @@ import { Ownable } from "./Ownable.sol";
  * System base contract
  */
 abstract contract System is ISystem, Ownable {
-  IUint256Component components;
-  IWorld world;
+  IUint256Component internal components;
+  IWorld internal world;
 
   constructor(IWorld _world, address _components) {
     // @deprecated use SystemStorage.components() instead of components

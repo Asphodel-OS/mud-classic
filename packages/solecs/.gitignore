@@ -1,8 +1,8 @@
-cache
 abi
+cache
+docs
 out
 types/ethers-contracts
-docs
 _docs
 DOCS.md
 artifacts

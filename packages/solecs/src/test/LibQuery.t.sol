@@ -3,7 +3,6 @@ pragma solidity >=0.8.0;
 
 import { DSTest } from "ds-test/test.sol";
 import { Vm } from "forge-std/Vm.sol";
-import { console } from "forge-std/console.sol";
 
 import { World } from "../World.sol";
 import { LibQuery } from "../LibQuery.sol";

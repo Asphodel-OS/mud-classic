@@ -24,12 +24,12 @@ library SystemStorage {
 
   /**
    * Utility for accessing the STORAGE_SLOT location in the contract's storage
-   * @return l Layout struct at storage position l
+   * @return _layout Layout struct at storage position l
    */
-  function layout() internal pure returns (Layout storage l) {
+  function layout() internal pure returns (Layout storage _layout) {
     bytes32 slot = STORAGE_SLOT;
     assembly {
-      l.slot := slot
+      _layout.slot := slot
     }
   }
 
@@ -40,9 +40,9 @@ library SystemStorage {
    * @dev This function must be called at the start of any contract that expects libraries to access SystemStorage!
    */
   function init(IWorld _world, IUint256Component _components) internal {
-    Layout storage l = layout();
-    l.world = _world;
-    l.components = _components;
+    Layout storage _layout = layout();
+    _layout.world = _world;
+    _layout.components = _components;
   }
 
   /**
