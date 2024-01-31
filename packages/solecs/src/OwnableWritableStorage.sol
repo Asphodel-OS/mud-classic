@@ -9,10 +9,10 @@ library OwnableWritableStorage {
 
   bytes32 internal constant STORAGE_SLOT = keccak256("solecs.contracts.storage.OwnableWritable");
 
-  function layout() internal pure returns (Layout storage l) {
+  function layout() internal pure returns (Layout storage _layout) {
     bytes32 slot = STORAGE_SLOT;
     assembly {
-      l.slot := slot
+      _layout.slot := slot
     }
   }
 }

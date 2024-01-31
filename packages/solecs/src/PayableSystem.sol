@@ -11,8 +11,8 @@ import { Ownable } from "./Ownable.sol";
  * System base contract
  */
 abstract contract PayableSystem is IPayableSystem, Ownable {
-  IUint256Component components;
-  IWorld world;
+  IUint256Component internal components;
+  IWorld internal world;
 
   constructor(IWorld _world, address _components) {
     components = _components == address(0) ? _world.components() : IUint256Component(_components);

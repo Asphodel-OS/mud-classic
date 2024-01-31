@@ -1,4 +1,5 @@
 node_modules
+coverage
 .eslintcache
 .DS_STORE
 .parcel-cache

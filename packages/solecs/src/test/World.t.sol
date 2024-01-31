@@ -3,11 +3,9 @@ pragma solidity >=0.8.0;
 
 import { DSTest } from "ds-test/test.sol";
 import { Vm } from "forge-std/Vm.sol";
-import { console } from "forge-std/console.sol";
 
 import { World, WorldQueryFragment } from "../World.sol";
-import { LibQuery } from "../LibQuery.sol";
-import { QueryFragment, QueryType } from "../interfaces/Query.sol";
+import { QueryType } from "../interfaces/Query.sol";
 import { TestComponent1, TestComponent2, TestComponent3 } from "./components/TestComponent.sol";
 import { PrototypeTagComponent } from "./components/PrototypeTagComponent.sol";
 import { FromPrototypeComponent } from "./components/FromPrototypeComponent.sol";

@@ -31,7 +31,7 @@ contract SystemTest is DSTest {
   IUint256Component public systems;
   World internal world;
   IUint256Component public components;
-  SampleSystem system;
+  SampleSystem internal system;
 
   function setUp() public {
     world = new World();
