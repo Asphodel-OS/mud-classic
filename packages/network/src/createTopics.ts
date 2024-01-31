@@ -9,10 +9,11 @@ export type TopicsConfig<C extends Contracts> = {
   };
 };
 
+// we make some assumptions here on the input topic config being valid
 export function createTopics<C extends Contracts>(config: TopicsConfig<C>): ContractTopics[] {
   const contractTopics: ContractTopics[] = [];
   for (const key of Object.keys(config)) {
-    const { abi, topics } = config[key];
+    const { abi, topics } = config[key]!;
     const dummyContract = new ethers.Contract(
       ethers.constants.AddressZero,
       abi,
@@ -20,7 +21,7 @@ export function createTopics<C extends Contracts>(config: TopicsConfig<C>): Cont
     ) as C[typeof key];
     const contractTopic = [
       topics
-        .map((t) => dummyContract.filters[t as string]().topics)
+        .map((t) => dummyContract.filters[t as string]!().topics)
         .map((topicsOrUndefined) => (topicsOrUndefined || [])[0]),
     ] as Array<Array<string>>;
     contractTopics.push({

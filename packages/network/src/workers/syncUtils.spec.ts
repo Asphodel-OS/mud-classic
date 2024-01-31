@@ -1,5 +1,5 @@
-import { EntityID } from "@latticexyz/recs";
-import { sleep } from "@latticexyz/utils";
+import { EntityID } from "@mud-classic/recs";
+import { sleep } from "@mud-classic/utils";
 import { Subject } from "rxjs";
 import { NetworkComponentUpdate, NetworkEvents } from "../types";
 import { getCacheStoreEntries } from "./CacheStore";

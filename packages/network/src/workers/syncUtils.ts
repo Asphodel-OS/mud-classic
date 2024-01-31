@@ -1,6 +1,6 @@
 import { JsonRpcProvider, Network } from "@ethersproject/providers";
-import { EntityID, ComponentValue, Components } from "@latticexyz/recs";
-import { to256BitString, awaitPromise, range, Uint8ArrayToHexString } from "@latticexyz/utils";
+import { EntityID, ComponentValue, Components } from "@mud-classic/recs";
+import { to256BitString, awaitPromise, range, Uint8ArrayToHexString } from "@mud-classic/utils";
 import { BytesLike, Contract, BigNumber } from "ethers";
 import { Observable, map, concatMap, of, from } from "rxjs";
 import { createDecoder } from "../createDecoder";
@@ -21,9 +21,9 @@ import {
   NetworkEvent,
 } from "../types";
 import { CacheStore, createCacheStore, storeEvent, storeEvents } from "./CacheStore";
-import { abi as ComponentAbi } from "@latticexyz/solecs/abi/Component.json";
-import { abi as WorldAbi } from "@latticexyz/solecs/abi/World.json";
-import { Component, World } from "@latticexyz/solecs/types/ethers-contracts";
+import { abi as ComponentAbi } from "@mud-classic/solecs/abi/Component.json";
+import { abi as WorldAbi } from "@mud-classic/solecs/abi/World.json";
+import { Component, World } from "@mud-classic/solecs/types/ethers-contracts";
 import {
   ECSStreamBlockBundleReply,
   ECSStreamServiceClient,
@@ -124,15 +124,15 @@ export async function fetchSnapshotChunked(
   try {
     const response = pruneOptions
       ? snapshotClient.getStateLatestStreamPrunedV2({
-          worldAddress,
-          chunkPercentage,
-          pruneAddress: pruneOptions?.playerAddress,
-          pruneComponentId: pruneOptions?.hashedComponentId,
-        })
+        worldAddress,
+        chunkPercentage,
+        pruneAddress: pruneOptions?.playerAddress,
+        pruneComponentId: pruneOptions?.hashedComponentId,
+      })
       : snapshotClient.getStateLatestStreamV2({
-          worldAddress,
-          chunkPercentage,
-        });
+        worldAddress,
+        chunkPercentage,
+      });
 
     let i = 0;
     for await (const responseChunk of response) {
@@ -163,7 +163,7 @@ export async function reduceFetchedState(
   const { state, blockNumber, stateComponents, stateEntities } = response;
 
   for (const { componentIdIdx, entityIdIdx, value: rawValue } of state) {
-    const component = to256BitString(stateComponents[componentIdIdx]);
+    const component = to256BitString(stateComponents[componentIdIdx]!);
     const entity = stateEntities[entityIdIdx] as EntityID;
     const value = await decode(component, rawValue);
     storeEvent(cacheStore, { type: NetworkEvents.NetworkComponentUpdate, component, entity, value, blockNumber });
@@ -188,8 +188,8 @@ export async function reduceFetchedStateV2(
   const stateComponentsHex = stateComponents.map((e) => to256BitString(e));
 
   for (const { componentIdIdx, entityIdIdx, value: rawValue } of state) {
-    const component = stateComponentsHex[componentIdIdx];
-    const entity = stateEntitiesHex[entityIdIdx];
+    const component = stateComponentsHex[componentIdIdx]!;
+    const entity = stateEntitiesHex[entityIdIdx]!;
     if (entity == undefined) debug("invalid entity index", stateEntities.length, entityIdIdx);
     const value = await decode(component, rawValue);
     storeEvent(cacheStore, { type: NetworkEvents.NetworkComponentUpdate, component, entity, value, blockNumber });
@@ -301,8 +301,8 @@ export async function fetchEventsInBlockRangeChunked(
   const steps = [...range(numSteps, interval, fromBlockNumber)];
 
   for (let i = 0; i < steps.length; i++) {
-    const from = steps[i];
-    const to = i === steps.length - 1 ? toBlockNumber : steps[i + 1] - 1;
+    const from = steps[i]!;
+    const to = i === steps.length - 1 ? toBlockNumber : steps[i + 1]! - 1;
     const chunkEvents = await fetchWorldEvents(from, to);
 
     if (setPercentage) setPercentage(((i * interval) / delta) * 100);
@@ -356,20 +356,20 @@ export async function fetchStateInBlockRange(
  */
 export function createDecode(worldConfig: ContractConfig, provider: JsonRpcProvider) {
   const decoders: { [key: string]: (data: BytesLike) => ComponentValue } = {};
-  const world = new Contract(worldConfig.address, worldConfig.abi, provider) as World;
+  const world = new Contract(worldConfig.address, worldConfig.abi, provider) as unknown as World;
 
   async function decode(componentId: string, data: BytesLike, componentAddress?: string): Promise<ComponentValue> {
     // Create the decoder if it doesn't exist yet
     if (!decoders[componentId]) {
       const address = componentAddress || (await world.getComponent(componentId));
       debug("Creating decoder for", address);
-      const component = new Contract(address, ComponentAbi, provider) as Component;
+      const component = new Contract(address, ComponentAbi, provider) as unknown as Component;
       const [keys, values] = await component.getSchema();
       decoders[componentId] = createDecoder(keys, values);
     }
 
     // Decode the raw value
-    return decoders[componentId](data);
+    return decoders[componentId]!(data);
   }
 
   return decode;
@@ -380,6 +380,7 @@ export function createDecode(worldConfig: ContractConfig, provider: JsonRpcProvi
  * @returns World contract topics for the `ComponentValueSet` and `ComponentValueRemoved` events.
  */
 export function createWorldTopics() {
+  // @ts-ignore
   return createTopics<{ World: World }>({
     World: { abi: WorldAbi, topics: ["ComponentValueSet", "ComponentValueRemoved"] },
   });
@@ -460,7 +461,7 @@ export function createTransformWorldEventsFromStream(decode: ReturnType<typeof c
     const convertedEcsEvents: NetworkComponentUpdate[] = [];
 
     for (let i = 0; i < ecsEvents.length; i++) {
-      const ecsEvent = ecsEvents[i];
+      const ecsEvent = ecsEvents[i]!;
 
       const rawComponentId = ecsEvent.componentId;
       const entityId = ecsEvent.entityId;
@@ -497,8 +498,7 @@ function groupByTxHash(events: NetworkComponentUpdate[]) {
     if (["worker", "cache"].includes(event.txHash)) return acc;
 
     if (!acc[event.txHash]) acc[event.txHash] = [];
-
-    acc[event.txHash].push(event);
+    acc[event.txHash]!.push(event);
 
     return acc;
   }, {} as { [key: string]: NetworkComponentUpdate[] });
@@ -524,13 +524,13 @@ export function parseSystemCallsFromStreamEvents(events: NetworkComponentUpdate[
   for (const txHash of Object.keys(transactionHashToEvents)) {
     // All ECS events include the information needed to parse the SysytemCallTransasction out, so it doesn't
     // matter which one we take here.
-    const tx = parseSystemCallTransactionFromStreamNetworkComponentUpdate(transactionHashToEvents[txHash][0]);
+    const tx = parseSystemCallTransactionFromStreamNetworkComponentUpdate(transactionHashToEvents[txHash]![0]!);
     if (!tx) continue;
 
     systemCalls.push({
       type: NetworkEvents.SystemCall,
       tx,
-      updates: transactionHashToEvents[tx.hash],
+      updates: transactionHashToEvents[tx.hash]!,
     });
   }
 
@@ -556,7 +556,7 @@ export function createFetchSystemCallsFromEvents(provider: JsonRpcProvider) {
       systemCalls.push({
         type: NetworkEvents.SystemCall,
         tx,
-        updates: transactionHashToEvents[tx.hash],
+        updates: transactionHashToEvents[tx.hash]!,
       });
     }
 
@@ -567,8 +567,9 @@ export function createFetchSystemCallsFromEvents(provider: JsonRpcProvider) {
 function createFetchSystemCallData(fetchBlock: ReturnType<typeof createBlockCache>["fetchBlock"]) {
   return async (txHash: string, blockNumber: number) => {
     const block = await fetchBlock(blockNumber);
-    const tx = block.transactions.find((tx) => tx.hash === txHash);
+    if (!block) return;
 
+    const tx = block.transactions.find((tx) => tx.hash === txHash);
     if (!tx) return;
 
     return {

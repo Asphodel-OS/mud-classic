@@ -1,5 +1,5 @@
-import { Components, ComponentValue, EntityID, SchemaOf } from "@latticexyz/recs";
-import { packTuple, transformIterator, unpackTuple } from "@latticexyz/utils";
+import { Components, ComponentValue, EntityID, SchemaOf } from "@mud-classic/recs";
+import { packTuple, transformIterator, unpackTuple } from "@mud-classic/utils";
 import { initCache } from "../initCache";
 import { NetworkComponentUpdate, NetworkEvents } from "../types";
 import { ECSStateReply } from "../types/ecs-snapshot/ecs-snapshot";
@@ -110,9 +110,8 @@ export function mergeCacheStores(stores: CacheStore[]): CacheStore {
     for (const updateEvent of getCacheStoreEntries(store)) {
       storeEvent(result, updateEvent);
     }
+    result.blockNumber = store.blockNumber;
   }
-
-  result.blockNumber = sortedStores[sortedStores.length - 1].blockNumber;
 
   return result;
 }
@@ -135,12 +134,12 @@ export async function loadIndexDbCacheStore(cache: ECSCache): Promise<CacheStore
 
   // Init componentToIndex map
   for (let i = 0; i < components.length; i++) {
-    componentToIndex.set(components[i], i);
+    componentToIndex.set(components[i]!, i);
   }
 
   // Init entityToIndex map
   for (let i = 0; i < entities.length; i++) {
-    entityToIndex.set(entities[i], i);
+    entityToIndex.set(entities[i]!, i);
   }
 
   return { state, blockNumber, components, entities, componentToIndex, entityToIndex };

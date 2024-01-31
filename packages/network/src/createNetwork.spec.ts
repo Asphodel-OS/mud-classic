@@ -1,4 +1,4 @@
-import { sleep } from "@latticexyz/utils";
+import { sleep } from "@mud-classic/utils";
 import { reaction, runInAction } from "mobx";
 import { createNetwork, Network } from "./createNetwork";
 

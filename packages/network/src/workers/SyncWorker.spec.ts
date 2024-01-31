@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { JsonRpcProvider } from "@ethersproject/providers";
-import { keccak256, sleep } from "@latticexyz/utils";
+import { keccak256, sleep } from "@mud-classic/utils";
 import { computed } from "mobx";
 import { ack, Input, InputType, SyncWorker } from "./SyncWorker";
 import { concatMap, from, map, Subject, Subscription, timer } from "rxjs";
 import { isNetworkComponentUpdateEvent, NetworkComponentUpdate, NetworkEvents, SyncWorkerConfig } from "../types";
-import { Components, EntityID } from "@latticexyz/recs";
+import { Components, EntityID } from "@mud-classic/recs";
 import { createCacheStore, storeEvent } from "./CacheStore";
 import * as syncUtils from "./syncUtils";
 import "fake-indexeddb/auto";

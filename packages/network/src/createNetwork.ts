@@ -7,7 +7,7 @@ import { createClock } from "./createClock";
 import { fetchBlock } from "./networkUtils";
 import { createBlockNumberStream } from "./createBlockNumberStream";
 import { Signer, Wallet } from "ethers";
-import { computedToStream } from "@latticexyz/utils";
+import { computedToStream } from "@mud-classic/utils";
 
 export type Network = Awaited<ReturnType<typeof createNetwork>>;
 

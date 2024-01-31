@@ -1,6 +1,6 @@
 import { BigNumber } from "ethers";
 import { keccak256 } from "ethers/lib/utils";
-import { EntityID } from "@latticexyz/recs";
+import { EntityID } from "@mud-classic/recs";
 
 import { Message } from "./types/ecs-relay/ecs-relay";
 

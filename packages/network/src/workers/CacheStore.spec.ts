@@ -1,5 +1,5 @@
-import { EntityID } from "@latticexyz/recs";
-import { packTuple } from "@latticexyz/utils";
+import { EntityID } from "@mud-classic/recs";
+import { packTuple } from "@mud-classic/utils";
 import { NetworkComponentUpdate, NetworkEvents } from "../types";
 import {
   createCacheStore,

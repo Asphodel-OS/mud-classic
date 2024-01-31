@@ -1,7 +1,7 @@
 import { Result } from "@ethersproject/abi";
 import { ExternalProvider } from "@ethersproject/providers";
-import { Components, ComponentValue, EntityID, SchemaOf } from "@latticexyz/recs";
-import { Cached } from "@latticexyz/utils";
+import { Components, ComponentValue, EntityID, SchemaOf } from "@mud-classic/recs";
+import { Cached } from "@mud-classic/utils";
 import { TxMetadata } from "./types/ecs-stream/ecs-stream";
 import { BaseContract, BigNumber, ContractInterface } from "ethers";
 import { Observable } from "rxjs";
