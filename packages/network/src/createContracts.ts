@@ -2,7 +2,7 @@ import { Contracts, ContractsConfig } from "./types";
 import { Contract, Signer } from "ethers";
 import { Provider } from "@ethersproject/providers";
 import { computed, IComputedValue } from "mobx";
-import { mapObject } from "@latticexyz/utils";
+import { mapObject } from "@mud-classic/utils";
 
 /**
  * Create an object of contracts connected to the currently connected provider.

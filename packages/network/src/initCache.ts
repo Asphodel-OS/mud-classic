@@ -1,4 +1,4 @@
-import { arrayToIterator, deferred, mergeIterators, transformIterator } from "@latticexyz/utils";
+import { arrayToIterator, deferred, mergeIterators, transformIterator } from "@mud-classic/utils";
 
 const indexedDB = self.indexedDB;
 const VERSION = 2;

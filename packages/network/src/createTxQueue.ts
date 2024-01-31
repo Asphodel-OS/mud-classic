@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { BaseContract, BigNumberish, utils, CallOverrides, Overrides } from "ethers";
 import { autorun, computed, IComputedValue, IObservableValue, observable, runInAction } from "mobx";
-import { mapObject, deferred, uuid, awaitValue, cacheUntilReady } from "@latticexyz/utils";
+import { mapObject, deferred, uuid, awaitValue, cacheUntilReady } from "@mud-classic/utils";
 import { Mutex } from "async-mutex";
 import { JsonRpcProvider, TransactionReceipt } from "@ethersproject/providers";
 import { Contracts, TxQueue } from "./types";
@@ -98,8 +98,14 @@ export function createTxQueue<C extends Contracts>(
     const stateMutability = fragment && (fragment as { stateMutability?: string }).stateMutability;
 
     // Create a function that estimates gas if no gas is provided
+    let estimateGas: () => BigNumberish | Promise<BigNumberish>;
     const gasLimit = overrides["gasLimit"];
-    const estimateGas = gasLimit == null ? () => target.estimateGas[prop as string](...args) : () => gasLimit;
+    if (gasLimit) estimateGas = () => gasLimit;
+    else {
+      const estGasFunction = target.estimateGas[prop as string];
+      if (estGasFunction) estimateGas = () => estGasFunction(...args);
+      else estimateGas = () => 100000;
+    }
 
     // Create a function that executes the tx when called
     const execute = async (nonce: number, gasLimit: BigNumberish) => {
@@ -349,8 +355,8 @@ function createPriorityQueue<T>() {
 
   function next(): T | undefined {
     if (queue.size === 0) return;
-    const [key, value] = queueByPriority()[0];
-    queue.delete(key);
+    const [key, value] = queueByPriority()[0]!;
+    if (queue.has(key)) queue.delete(key);
     return value.element;
   }
 

@@ -1,4 +1,4 @@
-import { EntityID } from "@latticexyz/recs";
+import { EntityID } from "@mud-classic/recs";
 
 export enum SyncState {
   CONNECTING,

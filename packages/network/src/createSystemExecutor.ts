@@ -1,6 +1,6 @@
 import { Provider } from "@ethersproject/providers";
-import { Component, EntityIndex, getComponentEntities, getComponentValue, Type, World } from "@latticexyz/recs";
-import { deferred, keccak256, toEthAddress } from "@latticexyz/utils";
+import { Component, EntityIndex, getComponentEntities, getComponentValue, Type, World } from "@mud-classic/recs";
+import { deferred, keccak256, toEthAddress } from "@mud-classic/utils";
 import { Contract, ContractInterface, Signer } from "ethers";
 import { observable, runInAction } from "mobx";
 import { createTxQueue } from "./createTxQueue";
@@ -67,7 +67,7 @@ export function createSystemExecutor<T extends { [key: string]: Contract }>(
   return { systems: txQueue, registerSystem, getSystemContract };
 
   function getSystemContract(systemId: string) {
-    const name = systemIdPreimages[systemId];
+    const name = systemIdPreimages[systemId] as keyof T;
 
     return {
       name,
@@ -88,7 +88,7 @@ export function createSystemExecutor<T extends { [key: string]: Contract }>(
     }
     return {
       id,
-      contract: new Contract(toEthAddress(world.entities[entity]), interfaces[id], signerOrProvider) as C,
+      contract: new Contract(toEthAddress(world.entities[entity]!), interfaces[id]!, signerOrProvider) as C,
     };
   }
 }

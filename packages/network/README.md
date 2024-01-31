@@ -22,11 +22,11 @@ import {
   createEncoder,
   NetworkComponentUpdate,
   createSystemExecutor,
-} from "@latticexyz/network";
+} from "@mud-classic/network";
 
-import { Component as SolecsComponent, World as WorldContract } from "@latticexyz/solecs";
-import { abi as WorldAbi } from "@latticexyz/solecs/abi/World.json";
-import ComponentAbi from "@latticexyz/solecs/abi/Component.json";
+import { Component as SolecsComponent, World as WorldContract } from "@mud-classic/solecs";
+import { abi as WorldAbi } from "@mud-classic/solecs/abi/World.json";
+import ComponentAbi from "@mud-classic/solecs/abi/Component.json";
 
 import {
   Component,
@@ -39,11 +39,11 @@ import {
   setComponent,
   Type,
   World,
-} from "@latticexyz/recs";
+} from "@mud-classic/recs";
 
-import { keccak256, stretch, toEthAddress } from "@latticexyz/utils";
+import { keccak256, stretch, toEthAddress } from "@mud-classic/utils";
 
-import { defineStringComponent } from "@latticexyz/std-client";
+import { defineStringComponent } from "@mud-classic/std-client";
 
 import { bufferTime, filter, Observable, Subject } from "rxjs";
 import { computed, IComputedValue } from "mobx";

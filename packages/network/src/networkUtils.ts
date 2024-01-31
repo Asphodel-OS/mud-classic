@@ -7,7 +7,7 @@ import {
   BaseProvider,
   TransactionRequest,
 } from "@ethersproject/providers";
-import { callWithRetry, extractEncodedArguments, range, sleep } from "@latticexyz/utils";
+import { callWithRetry, extractEncodedArguments, range, sleep } from "@mud-classic/utils";
 import { BigNumber, Contract } from "ethers";
 import { resolveProperties, defaultAbiCoder as abi } from "ethers/lib/utils";
 import { Contracts, ContractTopics, ContractEvent, ContractsConfig } from "./types";
@@ -111,14 +111,13 @@ export async function fetchLogs<C extends Contracts>(
   };
 
   if (requireMinimumBlockNumber) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     for (const _ in range(10)) {
       const call = () => Promise.all([blockPromise(), ...getLogPromises()]);
       const [blockNumber, logs] = await callWithRetry<[number, ...Array<Array<Log>>]>(call, [], 10, 1000);
       if (blockNumber < requireMinimumBlockNumber) {
         await sleep(500);
       } else {
-        return logs.flat();
+        return (logs ?? []).flat();
       }
     }
     throw new Error("Could not fetch logs with a required minimum block number");
@@ -177,15 +176,15 @@ export async function fetchEventsInBlockRange<C extends Contracts>(
 
   // construct an object: address => keyof C
   const addressToContractKey: { [key in string]: keyof C } = {};
-  for (const contractKey of Object.keys(contracts)) {
-    addressToContractKey[contracts[contractKey].address.toLowerCase()] = contractKey;
+  for (const [key, contract] of Object.entries(contracts)) {
+    addressToContractKey[contract.address.toLowerCase()] = key;
   }
 
   // parse the logs to get the logs description, then turn them into contract events
   const contractEvents: Array<ContractEvent<C>> = [];
 
   for (let i = 0; i < logs.length; i++) {
-    const log = logs[i];
+    const log = logs[i]!;
     const contractKey = addressToContractKey[log.address.toLowerCase()];
     if (!contractKey) {
       throw new Error(

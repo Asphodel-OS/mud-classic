@@ -3,7 +3,7 @@ import { from, map, Subject } from "rxjs";
 import { spawn } from "threads";
 import { messagePayload } from "./utils";
 import { createChannel, createClient } from "nice-grpc-web";
-import { awaitPromise, awaitStreamValue } from "@latticexyz/utils";
+import { awaitPromise, awaitStreamValue } from "@mud-classic/utils";
 import { grpc } from "@improbable-eng/grpc-web";
 import { ECSRelayServiceDefinition, Message, PushRequest } from "./types/ecs-relay/ecs-relay";
 
@@ -30,7 +30,7 @@ export async function createRelayStream(signer: Signer, url: string, id: string)
   const event$ = from(wsClient.openStream(signature)).pipe(
     map(async (message) => ({
       message,
-      address: await recoverWorker.recoverAddress(message),
+      address: await recoverWorker.recoverAddress!(message),
     })),
     awaitPromise()
   );

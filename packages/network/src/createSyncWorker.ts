@@ -1,5 +1,5 @@
-import { Components } from "@latticexyz/recs";
-import { fromWorker } from "@latticexyz/utils";
+import { Components } from "@mud-classic/recs";
+import { fromWorker } from "@mud-classic/utils";
 import { map, Observable, Subject, timer } from "rxjs";
 import { NetworkEvent } from "./types";
 import { Input, Ack, ack } from "./workers/SyncWorker";

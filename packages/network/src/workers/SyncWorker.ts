@@ -1,4 +1,4 @@
-import { awaitStreamValue, DoWork, filterNullish, keccak256, streamToDefinedComputed } from "@latticexyz/utils";
+import { awaitStreamValue, DoWork, filterNullish, keccak256, streamToDefinedComputed } from "@mud-classic/utils";
 import {
   bufferTime,
   catchError,
@@ -20,7 +20,7 @@ import {
   SyncStateStruct,
   SyncWorkerConfig,
 } from "../types";
-import { Components, ComponentValue, SchemaOf } from "@latticexyz/recs";
+import { Components, ComponentValue, SchemaOf } from "@mud-classic/recs";
 import {
   createCacheStore,
   getCacheStoreEntries,
@@ -167,16 +167,16 @@ export class SyncWorker<C extends Components> implements DoWork<Input, NetworkEv
     );
     const latestEvent$ = streamServiceUrl
       ? createLatestEventStreamService(
-          streamServiceUrl,
-          worldContract.address,
-          transformWorldEvents,
-          Boolean(fetchSystemCalls)
-        ).pipe(
-          catchError((err) => {
-            console.error("SyncWorker stream service error, falling back to RPC", err);
-            return latestEventRPC$;
-          })
-        )
+        streamServiceUrl,
+        worldContract.address,
+        transformWorldEvents,
+        Boolean(fetchSystemCalls)
+      ).pipe(
+        catchError((err) => {
+          console.error("SyncWorker stream service error, falling back to RPC", err);
+          return latestEventRPC$;
+        })
+      )
       : latestEventRPC$;
 
     const initialLiveEvents: NetworkComponentUpdate<Components>[] = [];
