@@ -12,6 +12,7 @@
   },
   "types": "./types/ethers-contracts/",
   "scripts": {
+    "prepare": "pnpm build",
     "build": "rimraf out && forge build && yarn dist && yarn types",
     "dist": "rimraf abi && mkdir abi && cat exports.txt | cut -d: -f7 | sort -n | uniq | xargs -n 1 sh -c 'cp out/\"$@\".sol/*.json abi/' sh && rimraf abi/*.metadata.json",
     "lint": "yarn prettier && yarn solhint",
@@ -22,8 +23,8 @@
     "types": "rimraf types && typechain --target=ethers-v5 abi/*.json"
   },
   "devDependencies": {
-    "@solidstate/contracts": "^0.0.52",
     "@mud-classic/solecs": "^0.0.1",
+    "@solidstate/contracts": "^0.0.52",
     "@types/mocha": "^9.1.1",
     "@typechain/ethers-v5": "^9.0.0",
     "ds-test": "https://github.com/dapphub/ds-test.git#c9ce3f25bde29fc5eb9901842bf02850dfd2d084",
