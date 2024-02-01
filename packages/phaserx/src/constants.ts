@@ -1,3 +1,5 @@
+import "phaser";
+
 export enum AssetType {
   Image,
   SpriteSheet,
