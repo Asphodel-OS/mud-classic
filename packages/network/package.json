@@ -3,7 +3,7 @@
   "author": "Asphodel Studios",
   "license": "MIT",
   "type": "module",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "repository": {
     "type": "git",
     "url": "https://github.com/Asphodel-OS/mud-classic.git",
@@ -25,7 +25,7 @@
     "@ethersproject/abi": "^5.6.0",
     "@ethersproject/providers": "^5.6.1",
     "@improbable-eng/grpc-web": "^0.15.0",
-    "@mud-classic/recs": "^0.0.1",
+    "@mud-classic/recs": "^0.0.2",
     "@mud-classic/solecs": "^0.0.1",
     "@mud-classic/utils": "^0.0.1",
     "async-mutex": "^0.3.2",
