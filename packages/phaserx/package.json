@@ -23,8 +23,7 @@
   },
   "dependencies": {
     "@use-gesture/vanilla": "10.2.9",
-    "phaser": "3.60.0-beta.14",
-    "react": "^18.2.0"
+    "phaser": "3.60.0-beta.14"
   },
   "devDependencies": {
     "@mud-classic/utils": "^0.0.1"
