@@ -1,4 +1,4 @@
-import { arrayToIterator, mergeIterators } from "./iterable";
+import { arrayToIterator, mergeIterators } from "../src/iterable";
 
 describe("arrayToIterator", () => {
   it("should return an iterable iterator with the same content as the array", () => {

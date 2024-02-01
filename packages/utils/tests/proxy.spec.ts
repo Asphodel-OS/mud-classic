@@ -1,7 +1,7 @@
 import { runInAction } from "mobx";
 import { computed, observable } from "mobx";
-import { deferred } from "./deferred";
-import { cacheUntilReady } from "./proxy";
+import { deferred } from "../src/deferred";
+import { cacheUntilReady } from "../src/proxy";
 
 describe("cacheUntilReady", () => {
   describe("property access", () => {
