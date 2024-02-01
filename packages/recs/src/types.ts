@@ -81,6 +81,11 @@ export interface Component<S extends Schema = Schema, M extends Metadata = Metad
   update$: Subject<ComponentUpdate<S, T>> & { observers: any };
 }
 
+export type Override<S extends Schema, T = undefined> = {
+  entity: EntityIndex;
+  value: Partial<ComponentValue<S, T>> | null;
+};
+
 /**
  * Type of indexer returned by {@link createIndexer}.
  */

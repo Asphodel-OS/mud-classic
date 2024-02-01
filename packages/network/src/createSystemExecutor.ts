@@ -88,7 +88,10 @@ export function createSystemExecutor<T extends { [key: string]: Contract }>(
     }
     return {
       id,
-      contract: new Contract(toEthAddress(world.entities[entity]!), interfaces[id]!, signerOrProvider) as C,
+      contract: new Contract(
+        toEthAddress(world.entities[entity]!),
+        interfaces[id]!, signerOrProvider
+      ) as C,
     };
   }
 }
