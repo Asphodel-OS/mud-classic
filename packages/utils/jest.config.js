@@ -4,6 +4,6 @@ export default {
   roots: ["tests"],
   testEnvironment: "node",
   transform: {
-    '^.+\\.(js|jsx)$': 'babel-jest',
+    '^.+\\.jsx?$': 'babel-jest',
   },
 };
