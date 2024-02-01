@@ -1,6 +1,6 @@
 import { Subject } from "rxjs";
-import { awaitStreamValue, streamToComputed } from "./rx";
-import { sleep } from "./sleep";
+import { awaitStreamValue, streamToComputed } from "../src/rx";
+import { sleep } from "../src/sleep";
 
 describe("streamToComputed", () => {
   it("should return a computed value that corresponds to the last stream value", () => {

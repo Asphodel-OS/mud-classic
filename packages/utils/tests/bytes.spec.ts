@@ -7,8 +7,8 @@ import {
   Int32ArrayToUint8Array,
   Uint8ArrayToInt32Array,
   ethAddressToUint8Array,
-} from "./bytes";
-import { random } from "./random";
+} from "../src/bytes";
+import { random } from "../src/random";
 
 const NUM_TESTS = 1000;
 

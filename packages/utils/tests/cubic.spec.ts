@@ -1,4 +1,4 @@
-import { cubicNoiseSample2, cubicNoiseConfig } from "./cubic";
+import { cubicNoiseSample2, cubicNoiseConfig } from "../src/cubic";
 
 describe("Cubic", () => {
   it("computes noise", () => {

@@ -1,4 +1,4 @@
-import { pack, unpack } from "./pack";
+import { pack, unpack } from "../src/pack";
 
 describe("pack", () => {
   it("should pack multiple numbers into one 32 bit integer", () => {

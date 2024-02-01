@@ -1,4 +1,4 @@
-import { coordToKey, keyToCoord } from "./CoordMap";
+import { coordToKey, keyToCoord } from "../src/CoordMap";
 
 describe("CoordMap", () => {
   describe("coordToKey", () => {
