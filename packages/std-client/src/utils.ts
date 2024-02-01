@@ -14,11 +14,11 @@ import {
   ComponentValue,
   componentValueEquals,
   Metadata,
-} from "@latticexyz/recs";
-import { Coord, keccak256 } from "@latticexyz/utils";
+} from "@mud-classic/recs";
+import { Coord, keccak256 } from "@mud-classic/utils";
 import { BigNumber } from "ethers";
-import { Clock, GodID } from "@latticexyz/network";
-import { deferred } from "@latticexyz/utils";
+import { Clock, GodID } from "@mud-classic/network";
+import { deferred } from "@mud-classic/utils";
 import { filter } from "rxjs";
 
 export function getCurrentTurn(

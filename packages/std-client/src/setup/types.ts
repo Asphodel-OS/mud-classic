@@ -1,5 +1,5 @@
-import { NetworkConfig, SyncWorkerConfig, NetworkComponentUpdate, SystemCall } from "@latticexyz/network";
-import { EntityIndex, Schema, Components, Type, Component } from "@latticexyz/recs";
+import { NetworkConfig, SyncWorkerConfig, NetworkComponentUpdate, SystemCall } from "@mud-classic/network";
+import { EntityIndex, Schema, Components, Type, Component } from "@mud-classic/recs";
 import { Contract } from "ethers";
 
 export type SetupContractConfig = NetworkConfig &

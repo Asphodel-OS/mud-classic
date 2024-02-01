@@ -1,4 +1,4 @@
-import { defineComponent, Metadata, Type, World } from "@latticexyz/recs";
+import { defineComponent, Metadata, Type, World } from "@mud-classic/recs";
 
 export function defineBoolComponent<M extends Metadata>(
   world: World,

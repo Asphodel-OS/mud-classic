@@ -1,4 +1,4 @@
-import { defineComponent, Type, World } from "@latticexyz/recs";
+import { defineComponent, Type, World } from "@mud-classic/recs";
 
 /**
  * DevHighlight is for use during development to highlight the positions of

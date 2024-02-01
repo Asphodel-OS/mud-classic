@@ -8,7 +8,7 @@ import {
   NetworkComponentUpdate,
   NetworkEvent,
   SystemCall,
-} from "@latticexyz/network";
+} from "@mud-classic/network";
 import {
   Components,
   World,
@@ -22,10 +22,10 @@ import {
   getComponentEntities,
   getComponentValueStrict,
   Component,
-} from "@latticexyz/recs";
-import { toEthAddress } from "@latticexyz/utils";
-import { Component as SolecsComponent } from "@latticexyz/solecs";
-import ComponentAbi from "@latticexyz/solecs/abi/Component.json";
+} from "@mud-classic/recs";
+import { toEthAddress } from "@mud-classic/utils";
+import { Component as SolecsComponent } from "@mud-classic/solecs";
+import ComponentAbi from "@mud-classic/solecs/abi/Component.json";
 import { Contract, BigNumber, Signer } from "ethers";
 import { JsonRpcProvider } from "@ethersproject/providers";
 import { toLower, compact } from "lodash";
@@ -41,17 +41,18 @@ export function createDecodeNetworkComponentUpdate<C extends Components>(
   return (update: NetworkComponentUpdate) => {
     const entityIndex = world.entityToIndex.get(update.entity) ?? world.registerEntity({ id: update.entity });
     const componentKey = mappings[update.component];
-    const component = components[componentKey] as Component<Schema>;
-
     if (!componentKey) {
-      console.error(`Component mapping not found for component ID ${update.component} ${JSON.stringify(update.value)}`);
+      console.error(`
+        Component mapping not found for component ID 
+        ${update.component} ${JSON.stringify(update.value)}
+      `);
       return undefined;
     }
 
     return {
       ...update,
       entity: entityIndex,
-      component,
+      component: components[componentKey] as Component<Schema>,
     };
   };
 }
