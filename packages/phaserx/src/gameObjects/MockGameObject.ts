@@ -1,4 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import "phaser";
+
 type Method<F> = F extends (...args: any[]) => any ? F : never;
 
 type Mock = Partial<{
