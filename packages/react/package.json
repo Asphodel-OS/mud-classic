@@ -16,7 +16,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "prepare": "pnpm build",
-    "build": "tsup src/index.ts --format cjs,esm --dts-resolve --minify --clean --sourcemap --legacy-output",
+    "build": "tsup ./src",
     "dev": "tsup src/index.ts --format cjs,esm --dts-resolve --watch --sourcemap --legacy-output",
     "lint": "eslint . --ext .ts",
     "nuke": "rimraf node_modules/ dist/",

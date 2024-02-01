@@ -10,7 +10,7 @@ import {
   setComponent,
   removeComponent,
 } from "@mud-classic/recs";
-import { useComponentValue } from "./useComponentValue";
+import { useComponentValue } from "../src/useComponentValue";
 
 describe("useComponentValue", () => {
   let world: World;

@@ -12,7 +12,7 @@ import {
   HasValue,
   removeComponent,
 } from "@mud-classic/recs";
-import { useEntityQuery } from "./useEntityQuery";
+import { useEntityQuery } from "../src/useEntityQuery";
 
 describe("useEntityQuery", () => {
   let world: World;
