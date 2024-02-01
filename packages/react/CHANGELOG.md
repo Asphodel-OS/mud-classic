@@ -1,5 +1,13 @@
 # @mud-classic/react
 
+## 0.0.3
+
+### Patch Changes
+
+- e67daf1: fuck jest
+- Updated dependencies [bdd0ab6]
+  - @mud-classic/recs@0.0.3
+
 ## 0.0.2
 
 ### Patch Changes

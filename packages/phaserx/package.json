@@ -3,7 +3,7 @@
   "author": "Asphodel Studios",
   "license": "MIT",
   "type": "module",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "repository": {
     "type": "git",
     "url": "https://github.com/Asphodel-OS/mud-classic.git",
@@ -26,7 +26,7 @@
     "phaser": "3.60.0-beta.14"
   },
   "devDependencies": {
-    "@mud-classic/utils": "^0.0.1"
+    "@mud-classic/utils": "^0.0.2"
   },
   "peerDependencies": {
     "phaser": "3.60.0-beta.14",
