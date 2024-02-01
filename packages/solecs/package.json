@@ -23,10 +23,13 @@
     "types": "rimraf types && typechain --target=ethers-v5 abi/*.json"
   },
   "devDependencies": {
+    "@ethersproject/abi": "^5.6.0",
+    "@ethersproject/providers": "^5.6.1",
     "@solidstate/contracts": "^0.0.52",
     "@typechain/ethers-v5": "^9.0.0",
     "@types/mocha": "^9.1.1",
     "ds-test": "https://github.com/dapphub/ds-test.git#c9ce3f25bde29fc5eb9901842bf02850dfd2d084",
+    "ethers": "^5.7.1",
     "forge-std": "https://github.com/foundry-rs/forge-std.git#b4f121555729b3afb3c5ffccb62ff4b6e2818fd3",
     "hardhat": "^2.10.1",
     "memmove": "https://github.com/dk1a/memmove.git#ffd71cd77b1708574ef46a667b23ca3a5cc9fa27",
