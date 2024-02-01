@@ -13,14 +13,15 @@ import {
   runQuery,
   EntityID,
   EntityIndex,
-} from "@latticexyz/recs";
-import { deferred } from "@latticexyz/utils";
+} from "@mud-classic/recs";
+import { deferred } from "@mud-classic/utils";
 import { ReplaySubject } from "rxjs";
 import { ActionState, createActionSystem } from ".";
 import { waitForComponentValueIn } from "../../utils";
 import { waitForActionCompletion } from "./utils";
 import { ContractTransaction } from "ethers";
 
+// TODO: fix type failures
 describe("ActionSystem", () => {
   let world: World;
   let Resource: Component<{ amount: Type.Number }>;
@@ -33,7 +34,7 @@ describe("ActionSystem", () => {
   beforeEach(async () => {
     world = createWorld();
     txReduced$ = new ReplaySubject<string>();
-    actions = createActionSystem(world, txReduced$);
+    actions = createActionSystem(world, txReduced$, undefined);
     Action = actions.Action;
     Resource = defineComponent(world, { amount: Type.Number });
   });

@@ -1,3 +1,3 @@
 # MUD Client Standard Library
 
-Shared Components/Systems/Utils for making MUD game clients
+Foundational artifacts for building MUD game clients

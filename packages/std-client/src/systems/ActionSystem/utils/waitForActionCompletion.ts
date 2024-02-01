@@ -1,4 +1,4 @@
-import { EntityIndex } from "@latticexyz/recs";
+import { EntityIndex } from "@mud-classic/recs";
 import { defineActionComponent } from "../../../components";
 import { waitForComponentValueIn } from "../../../utils";
 import { ActionState } from "../constants";

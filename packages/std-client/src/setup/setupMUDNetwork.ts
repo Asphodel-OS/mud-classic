@@ -1,3 +1,4 @@
+import "@ethersproject/abstract-provider"; // we really need to figure out why this is necessary
 import {
   createNetwork,
   createContracts,
@@ -7,16 +8,17 @@ import {
   createSystemExecutor,
   Ack,
   InputType,
-} from "@latticexyz/network";
-import { BehaviorSubject, concatMap, from, Subject } from "rxjs";
-import { defineComponent, Type, World } from "@latticexyz/recs";
-import { computed } from "mobx";
-import { keccak256 } from "@latticexyz/utils";
+} from "@mud-classic/network";
+import { defineComponent, Type, World } from "@mud-classic/recs";
+import { World as WorldContract } from "@mud-classic/solecs/types/ethers-contracts/World";
+import { abi as WorldAbi } from "@mud-classic/solecs/abi/World.json";
+import { keccak256 } from "@mud-classic/utils";
 import { Contract, ContractInterface } from "ethers";
-import { World as WorldContract } from "@latticexyz/solecs/types/ethers-contracts/World";
-import { abi as WorldAbi } from "@latticexyz/solecs/abi/World.json";
-import { defineStringComponent } from "../components";
 import { keys } from "lodash";
+import { computed } from "mobx";
+import { BehaviorSubject, concatMap, from, Subject } from "rxjs";
+
+import { defineStringComponent } from "../components";
 import { ContractComponent, ContractComponents, NetworkComponents, SetupContractConfig } from "./types";
 import {
   applyNetworkUpdates,
@@ -25,7 +27,11 @@ import {
   createSystemCallStreams,
 } from "./utils";
 
-export async function setupMUDNetwork<C extends ContractComponents, SystemTypes extends { [key: string]: Contract }>(
+
+export async function setupMUDNetwork<
+  C extends ContractComponents,
+  SystemTypes extends { [key: string]: Contract }
+>(
   networkConfig: SetupContractConfig,
   world: World,
   contractComponents: C,
@@ -122,6 +128,7 @@ export async function setupMUDNetwork<C extends ContractComponents, SystemTypes 
     world,
     keys(SystemAbis),
     SystemsRegistry,
+    // @ts-ignore: we'll fix this type mismatch later..
     getSystemContract,
     decodeNetworkComponentUpdate
   );
@@ -178,7 +185,10 @@ export async function setupMUDNetwork<C extends ContractComponents, SystemTypes 
  * @param component component to find
  * @returns component if it exists in components object, otherwise the component passed in
  */
-function findOrDefineComponent<Cs extends ContractComponents, C extends ContractComponent>(
+function findOrDefineComponent<
+  Cs extends ContractComponents,
+  C extends ContractComponent
+>(
   components: Cs,
   component: C
 ): C {
