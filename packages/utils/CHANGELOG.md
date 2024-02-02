@@ -1,5 +1,11 @@
 # @mud-classic/utils
 
+## 0.0.3
+
+### Patch Changes
+
+- fix incorrect package entry targets
+
 ## 0.0.2
 
 ### Patch Changes

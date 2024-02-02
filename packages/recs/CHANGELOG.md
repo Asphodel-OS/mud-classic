@@ -1,5 +1,13 @@
 # @mud-classic/recs
 
+## 0.0.4
+
+### Patch Changes
+
+- fix incorrect package entry targets
+- Updated dependencies
+  - @mud-classic/utils@0.0.3
+
 ## 0.0.3
 
 ### Patch Changes

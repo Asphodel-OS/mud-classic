@@ -1,14 +1,14 @@
 import { EntityID } from "@mud-classic/recs";
 import { sleep } from "@mud-classic/utils";
 import { Subject } from "rxjs";
-import { NetworkComponentUpdate, NetworkEvents } from "../types";
-import { getCacheStoreEntries } from "./CacheStore";
+import { NetworkComponentUpdate, NetworkEvents } from "../../src/types";
+import { getCacheStoreEntries } from "../../src/workers/CacheStore";
 import {
   createLatestEventStreamRPC,
   createSnapshotClient,
   createWorldTopics,
   fetchStateInBlockRange,
-} from "./syncUtils";
+} from "../../src/workers/syncUtils";
 
 describe("syncUtils", () => {
   describe("createSnapshotClient", () => {
