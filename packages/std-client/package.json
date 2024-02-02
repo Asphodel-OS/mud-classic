@@ -4,14 +4,14 @@
   "description": "A standard framework for the MUD client.",
   "license": "MIT",
   "type": "module",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "repository": {
     "type": "git",
     "url": "https://github.com/Asphodel-OS/mud-classic.git",
     "directory": "packages/std-client"
   },
-  "main": "dist/index.js",
-  "module": "dist/esm/index.js",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
   "source": "src/index.ts",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -20,16 +20,16 @@
     "dev": "tsup src/index.ts --format cjs,esm --dts-resolve --watch --sourcemap --legacy-output",
     "lint": "eslint . --ext .ts",
     "nuke": "rimraf node_modules/ dist/",
-    "test": "tsc && jest --coverage --forceExit --detectOpenHandles"
+    "test": "pnpm build && jest --coverage --forceExit --detectOpenHandles"
   },
   "dependencies": {
     "@ethersproject/abstract-provider": "^5.7.0",
     "@ethersproject/networks": "^5.7.0",
     "@ethersproject/providers": "^5.7.0",
-    "@mud-classic/network": "^0.0.3",
-    "@mud-classic/recs": "^0.0.3",
+    "@mud-classic/network": "^0.0.4",
+    "@mud-classic/recs": "^0.0.4",
     "@mud-classic/solecs": "^0.0.1",
-    "@mud-classic/utils": "^0.0.2",
+    "@mud-classic/utils": "^0.0.3",
     "lodash": "^4.17.21"
   },
   "devDependencies": {

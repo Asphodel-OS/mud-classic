@@ -2,15 +2,15 @@
 import { JsonRpcProvider } from "@ethersproject/providers";
 import { keccak256, sleep } from "@mud-classic/utils";
 import { computed } from "mobx";
-import { ack, Input, InputType, SyncWorker } from "./SyncWorker";
+import { ack, Input, InputType, SyncWorker } from "../../src/workers/SyncWorker";
 import { concatMap, from, map, Subject, Subscription, timer } from "rxjs";
-import { isNetworkComponentUpdateEvent, NetworkComponentUpdate, NetworkEvents, SyncWorkerConfig } from "../types";
+import { isNetworkComponentUpdateEvent, NetworkComponentUpdate, NetworkEvents, SyncWorkerConfig } from "../../src/types";
 import { Components, EntityID } from "@mud-classic/recs";
-import { createCacheStore, storeEvent } from "./CacheStore";
-import * as syncUtils from "./syncUtils";
+import { createCacheStore, storeEvent } from "../../src/workers/CacheStore";
+import * as syncUtils from "../../src/workers/syncUtils";
 import "fake-indexeddb/auto";
-import { GodID, SyncState } from "./constants";
-import { createLatestEventStreamRPC, createLatestEventStreamService } from "./syncUtils";
+import { GodID, SyncState } from "../../src/workers/constants";
+import { createLatestEventStreamRPC, createLatestEventStreamService } from "../../src/workers/syncUtils";
 
 // Test constants
 const cacheBlockNumber = 99;
@@ -51,8 +51,8 @@ const gapStateEvents = [
 ] as NetworkComponentUpdate[];
 
 // Mocks
-jest.mock("../createProvider", () => ({
-  ...jest.requireActual("../createProvider"),
+jest.mock("../../src/createProvider", () => ({
+  ...jest.requireActual("../../src/createProvider"),
   createReconnectingProvider: () => ({
     providers: computed(() => ({
       json: new JsonRpcProvider(""),
@@ -60,8 +60,8 @@ jest.mock("../createProvider", () => ({
   }),
 }));
 
-jest.mock("./CacheStore", () => ({
-  ...jest.requireActual("./CacheStore"),
+jest.mock("../../src/workers/CacheStore", () => ({
+  ...jest.requireActual("../../src/workers/CacheStore"),
   getIndexDbECSCache: () => ({
     get: (store: string, key: string) => {
       if (store === "BlockNumber" && key === "current") return cacheBlockNumber;
@@ -77,13 +77,13 @@ jest.mock("./CacheStore", () => ({
   saveCacheStoreToIndexDb: jest.fn(),
 }));
 
-jest.mock("../createBlockNumberStream", () => ({
-  ...jest.requireActual("../createBlockNumberStream"),
+jest.mock("../../src/createBlockNumberStream", () => ({
+  ...jest.requireActual("../../src/createBlockNumberStream"),
   createBlockNumberStream: () => ({ blockNumber$ }),
 }));
 
-jest.mock("./syncUtils", () => ({
-  ...jest.requireActual("./syncUtils"),
+jest.mock("../../src/workers/syncUtils", () => ({
+  ...jest.requireActual("../../src/workers/syncUtils"),
   createFetchWorldEventsInBlockRange: () => () => Promise.resolve([]),
   createLatestEventStreamRPC: jest.fn(() => latestEvent$),
   createLatestEventStreamService: jest.fn(() => latestEvent$),

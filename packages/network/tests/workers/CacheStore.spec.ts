@@ -1,6 +1,6 @@
 import { EntityID } from "@mud-classic/recs";
 import { packTuple } from "@mud-classic/utils";
-import { NetworkComponentUpdate, NetworkEvents } from "../types";
+import { NetworkComponentUpdate, NetworkEvents } from "../../src/types";
 import {
   createCacheStore,
   getCacheStoreEntries,
@@ -9,7 +9,7 @@ import {
   mergeCacheStores,
   saveCacheStoreToIndexDb,
   storeEvent,
-} from "./CacheStore";
+} from "../../src/workers/CacheStore";
 
 import "fake-indexeddb/auto";
 

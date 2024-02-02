@@ -1,6 +1,6 @@
 import { sleep } from "@mud-classic/utils";
 import { reaction, runInAction } from "mobx";
-import { createNetwork, Network } from "./createNetwork";
+import { createNetwork, Network } from "../src/createNetwork";
 
 const config = {
   clock: {
