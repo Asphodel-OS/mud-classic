@@ -14,16 +14,25 @@ import { Input, Ack, ack } from "./workers/SyncWorker";
  * dispose: function to dispose of the sync worker
  * }
  */
+
 export function createSyncWorker<C extends Components = Components>(ack$?: Observable<Ack>) {
-  const input$ = new Subject<Input>();
-  const worker = new Worker(new URL("./workers/Sync.worker.ts", import.meta.url), { type: "module" });
-  const ecsEvents$ = new Subject<NetworkEvent<C>[]>();
+  const workerCode = `
+    import { runWorker } from "@mud-classic/utils";
+    import { SyncWorker } from "./SyncWorker";
+    runWorker(new SyncWorker());
+ `;
+
+  const blob = new Blob([workerCode], { type: 'text/javascript' });
+  const url = URL.createObjectURL(blob);
+  const worker = new Worker(url, { type: 'module' });
 
   // Send ack every 16ms if no external ack$ is provided
+  const input$ = new Subject<Input>();
   ack$ = ack$ || timer(0, 16).pipe(map(() => ack));
   const ackSub = ack$.subscribe(input$);
 
   // Pass in a "config stream", receive a stream of ECS events
+  const ecsEvents$ = new Subject<NetworkEvent<C>[]>();
   const subscription = fromWorker<Input, NetworkEvent<C>[]>(worker, input$).subscribe(ecsEvents$);
   const dispose = () => {
     worker.terminate();

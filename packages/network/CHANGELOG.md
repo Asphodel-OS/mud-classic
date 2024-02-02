@@ -1,5 +1,11 @@
 # @mud-classic/network
 
+## 0.0.5
+
+### Patch Changes
+
+- inline sync worker
+
 ## 0.0.4
 
 ### Patch Changes
