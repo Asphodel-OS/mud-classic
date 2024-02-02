@@ -1,5 +1,11 @@
 # @mud-classic/network
 
+## 0.0.6
+
+### Patch Changes
+
+- inline recover worker
+
 ## 0.0.5
 
 ### Patch Changes

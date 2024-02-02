@@ -17,9 +17,7 @@ export async function createRelayStream(signer: Signer, url: string, id: string)
   const httpClient = createClient(ECSRelayServiceDefinition, createChannel(url));
   const wsClient = createClient(ECSRelayServiceDefinition, createChannel(url, grpc.WebsocketTransport()));
 
-  const recoverWorker = await spawn(
-    new Worker(new URL("./workers/Recover.worker.ts", import.meta.url), { type: "module" })
-  );
+  const recoverWorker = createRecoverWorker();
   console.log({ recoverWorker });
 
   // Signature that should be used to prove identity
@@ -30,6 +28,7 @@ export async function createRelayStream(signer: Signer, url: string, id: string)
   const event$ = from(wsClient.openStream(signature)).pipe(
     map(async (message) => ({
       message,
+      // @ts-ignore
       address: await recoverWorker.recoverAddress!(message),
     })),
     awaitPromise()
@@ -82,4 +81,24 @@ export async function createRelayStream(signer: Signer, url: string, id: string)
   }
 
   return { event$, dispose, subscribe, unsubscribe, push, countConnected, ping };
+}
+
+async function createRecoverWorker() {
+  const workerCode = `
+    import { verifyMessage } from "ethers/lib/utils";
+    import { expose } from "threads";
+
+    import { Message } from "../types/ecs-relay/ecs-relay";
+    import { messagePayload } from "../utils";
+
+    function recoverAddress(msg: Message) {
+        return verifyMessage(messagePayload(msg), msg.signature);
+    }
+
+    expose({ recoverAddress });
+  `;
+
+  const blob = new Blob([workerCode], { type: 'text/javascript' });
+  const url = URL.createObjectURL(blob);
+  return await spawn(new Worker(url, { type: 'module' }));
 }

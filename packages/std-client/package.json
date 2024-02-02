@@ -4,7 +4,7 @@
   "description": "A standard framework for the MUD client.",
   "license": "MIT",
   "type": "module",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "repository": {
     "type": "git",
     "url": "https://github.com/Asphodel-OS/mud-classic.git",
@@ -26,7 +26,7 @@
     "@ethersproject/abstract-provider": "^5.7.0",
     "@ethersproject/networks": "^5.7.0",
     "@ethersproject/providers": "^5.7.0",
-    "@mud-classic/network": "^0.0.5",
+    "@mud-classic/network": "^0.0.6",
     "@mud-classic/recs": "^0.0.4",
     "@mud-classic/solecs": "^0.0.1",
     "@mud-classic/utils": "^0.0.3",
