@@ -3,7 +3,7 @@ import { execLog, extractIdFromFile, keccak256 } from "../utils";
 import { readFileSync } from "fs";
 import { Contract } from "ethers";
 import { JsonRpcProvider } from "@ethersproject/providers";
-import { abi as WorldAbi } from "@latticexyz/solecs/abi/World.json";
+import { abi as WorldAbi } from "@mud-classic/solecs/abi/World.json";
 
 type Options = {
   config?: string;
