@@ -1,8 +1,8 @@
 import { mapObject, uuid } from "@mud-classic/utils";
 import { Subject } from "rxjs";
+import { useEffect, useState } from "react";
 
 import { OptionalTypes } from "./constants";
-import { createIndexer } from "./Indexer";
 import {
   Component,
   ComponentValue,
@@ -13,7 +13,10 @@ import {
   Schema,
   World,
 } from "./types";
-import { isFullComponentValue, isIndexer } from "./utils";
+import { isComponentUpdate, isFullComponentValue, isIndexer } from "./utils";
+import { createIndexer } from "./Indexer";
+import { defineQuery, Has } from "./Query";
+
 
 /**
  * Components contain state indexed by entities and are one of the fundamental building blocks in ECS.
@@ -326,4 +329,41 @@ export function createLocalCache<S extends Schema, M extends Metadata, T = undef
   component.world.registerDisposer(() => updateSub?.unsubscribe());
 
   return component;
+}
+
+
+export function useComponentValue<S extends Schema>(
+  component: Component<S, Metadata, undefined>,
+  entityIndex: EntityIndex | undefined,
+  defaultValue: ComponentValue<S>
+): ComponentValue<S>;
+
+export function useComponentValue<S extends Schema>(
+  component: Component<S, Metadata, undefined>,
+  entityIndex: EntityIndex | undefined
+): ComponentValue<S> | undefined;
+
+export function useComponentValue<S extends Schema>(
+  component: Component<S, Metadata, undefined>,
+  entityIndex: EntityIndex | undefined,
+  defaultValue?: ComponentValue<S>
+) {
+  const [value, setValue] = useState(entityIndex != null ? getComponentValue(component, entityIndex) : undefined);
+
+  useEffect(() => {
+    // component or entityIndex changed, update state to latest value
+    setValue(entityIndex != null ? getComponentValue(component, entityIndex) : undefined);
+    if (entityIndex == null) return;
+
+    const queryResult = defineQuery([Has(component)], { runOnInit: false });
+    const subscription = queryResult.update$.subscribe((update) => {
+      if (isComponentUpdate(update, component) && update.entity === entityIndex) {
+        const [nextValue] = update.value;
+        setValue(nextValue);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [component, entityIndex]);
+
+  return value ?? defaultValue;
 }
